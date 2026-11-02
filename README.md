@@ -36,7 +36,17 @@ import "@eolymp/widget-sdk/style.css";
 widget({ answer: pickPath("#map", { start: "A" }) });
 ```
 
-Set `base: "./"` in Vite, develop with `npx @eolymp/widget-sdk dev --url http://localhost:5173/`, and pack the build with `npx @eolymp/widget-sdk pack dist`.
+Eolymp serves a widget from a subfolder (`/bundles/<id>/`), but Vite writes absolute paths like `/assets/index.js` by default, and those would point at the root of the asset host. Make Vite write relative paths:
+
+```js
+// vite.config.js
+export default { base: "./" };
+```
+
+```sh
+npx @eolymp/widget-sdk dev --url http://localhost:5173/   # host the Vite dev server like Eolymp does
+npx @eolymp/widget-sdk pack dist                          # zip the build output
+```
 
 ### Why the SDK is copied into the bundle
 
