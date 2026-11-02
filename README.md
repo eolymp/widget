@@ -23,34 +23,9 @@ const board = eolymp.grid("#board", { rows: 4, cols: 4 });
 eolymp.widget({ answer: board });
 ```
 
-### With a bundler
-
-```sh
-npm install @eolymp/widget-sdk
-```
-
-```js
-import { pickPath, widget } from "@eolymp/widget-sdk";
-import "@eolymp/widget-sdk/style.css";
-
-widget({ answer: pickPath("#map", { start: "A" }) });
-```
-
-Eolymp serves a widget from a subfolder (`/bundles/<id>/`), but Vite writes absolute paths like `/assets/index.js` by default, and those would point at the root of the asset host. Make Vite write relative paths:
-
-```js
-// vite.config.js
-export default { base: "./" };
-```
-
-```sh
-npx @eolymp/widget-sdk dev --url http://localhost:5173/   # host the Vite dev server like Eolymp does
-npx @eolymp/widget-sdk pack dist                          # zip the build output
-```
-
 ### Why the SDK is copied into the bundle
 
-Widgets run under a content policy that allows scripts only from Eolymp's asset host, so a widget cannot load the SDK from a CDN. `init` copies `widget-sdk.js` and `widget-sdk.css` into `lib/`, and a bundler inlines them. The standalone build is also published at `@eolymp/widget-sdk/widget-sdk.js` (for example on jsDelivr or unpkg) to download, not to link.
+Widgets run under a content policy that allows scripts only from Eolymp's asset host, so a widget cannot load the SDK from a CDN. `init` copies `widget-sdk.js` and `widget-sdk.css` into `lib/`. The standalone build is also published at `@eolymp/widget-sdk/widget-sdk.js` (for example on jsDelivr or unpkg) to download, not to link.
 
 ## The principle
 

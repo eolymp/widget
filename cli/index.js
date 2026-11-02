@@ -41,7 +41,6 @@ const HELP = `eolymp-widget — build widget problems for Eolymp
 
   eolymp-widget init [dir]              create a starter widget in dir (default: ./widget)
   eolymp-widget dev [dir] [--port N]    run the widget in a local host that behaves like Eolymp
-  eolymp-widget dev --url <url>         host a widget served elsewhere (e.g. a Vite dev server)
   eolymp-widget pack [dir] [-o file]    check the folder against the platform rules and zip it
 
 Docs: https://github.com/eolymp/widget-sdk#readme`;
@@ -51,7 +50,6 @@ function args(list) {
   for (let i = 0; i < list.length; i++) {
     const a = list[i];
     if (a === "--port" || a === "-p") out.port = Number(list[++i]);
-    else if (a === "--url") out.url = list[++i];
     else if (a === "-o" || a === "--out") out.out = list[++i];
     else if (a === "--entry") out.entry = list[++i];
     else if (a === "--force") out.force = true;
@@ -89,13 +87,6 @@ function check(root, entry) {
   const files = all.filter((f) => !/\.md$/i.test(f.path));
   const docs = all.filter((f) => /\.md$/i.test(f.path)).map((f) => f.path);
 
-  if (existsSync(join(root, "package.json"))) {
-    errors.push(
-      "this folder has a package.json, so it looks like a project rather than a build. Pack the build output instead (for Vite: `eolymp-widget pack dist`).",
-    );
-    return { files, docs, errors, warnings, total: 0 };
-  }
-
   if (!files.some((f) => f.path === entry)) {
     errors.push(`${entry} not found — it is the page Eolymp loads`);
   }
@@ -121,7 +112,7 @@ function check(root, entry) {
 
       if (/\.html?$/i.test(f.path)) {
         for (const m of text.matchAll(/(?:src|href)\s*=\s*["'](\/(?!\/)[^"']*)["']/g)) {
-          errors.push(`${f.path}: "${m[1]}" is an absolute path; use a relative one ("./${m[1].replace(/^\/+/, "")}"). For Vite set \`base: "./"\`.`);
+          errors.push(`${f.path}: "${m[1]}" is an absolute path; use a relative one ("./${m[1].replace(/^\/+/, "")}").`);
         }
       }
     }
@@ -186,7 +177,7 @@ function dev(opts) {
   const harness = readFileSync(join(here, "harness.html"), "utf8");
   const clients = new Set();
 
-  if (!opts.url && !existsSync(root)) {
+  if (!existsSync(root)) {
     console.error(`error: ${root} does not exist`);
     process.exit(1);
   }
@@ -195,7 +186,7 @@ function dev(opts) {
     const url = new URL(req.url ?? "/", "http://localhost");
 
     if (url.pathname === "/" || url.pathname === "/index.html") {
-      const src = opts.url ?? `/w/${opts.entry ?? "index.html"}`;
+      const src = `/w/${opts.entry ?? "index.html"}`;
       res.writeHead(200, { "content-type": TYPES[".html"], "cache-control": "no-store" });
       res.end(harness.replace("__WIDGET_SRC__", JSON.stringify(src)));
       return;
@@ -209,7 +200,7 @@ function dev(opts) {
       return;
     }
 
-    if (url.pathname.startsWith("/w/") && !opts.url) {
+    if (url.pathname.startsWith("/w/")) {
       const rel = decodeURIComponent(url.pathname.slice(3));
       const full = resolve(root, rel);
       if (!full.startsWith(root + sep) || !existsSync(full) || lstatSync(full).isDirectory()) {
@@ -234,19 +225,17 @@ function dev(opts) {
     res.writeHead(404).end("not found");
   });
 
-  if (!opts.url) {
-    let timer;
-    watch(root, { recursive: true }, () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        for (const c of clients) c.write("data: reload\n\n");
-      }, 100);
-    });
-  }
+  let timer;
+  watch(root, { recursive: true }, () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      for (const c of clients) c.write("data: reload\n\n");
+    }, 100);
+  });
 
   server.listen(port, () => {
     console.log(`Widget host: http://localhost:${port}`);
-    console.log(opts.url ? `Hosting ${opts.url}` : `Serving ${relative(process.cwd(), root) || "."}, reloading on change`);
+    console.log(`Serving ${relative(process.cwd(), root) || "."}, reloading on change`);
   });
 }
 

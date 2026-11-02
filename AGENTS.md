@@ -57,8 +57,6 @@ eolymp.widget({ answer: board });
 
 This submits `[[0,1,0,0],[0,0,1,0],...]`, restores drafts and past submissions, locks itself in view mode, and reports its height. `lib/widget-sdk.js` defines the global `eolymp`.
 
-With a bundler, use `import { grid, widget } from "@eolymp/widget-sdk"` and `import "@eolymp/widget-sdk/style.css"`. See "Using a bundler" below.
-
 ## Core API
 
 ### `eolymp.widget(definition)`
@@ -204,21 +202,6 @@ Variables: `--ew-font --ew-fg --ew-muted --ew-surface --ew-subtle --ew-border --
 - It must work from **360px** wide (a phone) up to about 900px. Use `max-width: 100%` and scale SVGs with `viewBox`; never use a fixed page width.
 - Keep the background transparent so the widget sits naturally on the page.
 - The frame grows to the document's height automatically. Avoid `height: 100vh`, because it creates a feedback loop.
-
-## Using a bundler (Vite, etc.)
-
-```sh
-npm install @eolymp/widget-sdk
-```
-
-```js
-import { grid, widget } from "@eolymp/widget-sdk";
-import "@eolymp/widget-sdk/style.css";
-```
-
-- Set `base: "./"` in `vite.config`, or the built page will reference `/assets/...`, which won't resolve on Eolymp.
-- During development, run `npx @eolymp/widget-sdk dev --url http://localhost:5173/` to host the dev server inside the Eolymp-like host.
-- Pack the build output: `npx @eolymp/widget-sdk pack dist`.
 
 ## Checklist before uploading
 
