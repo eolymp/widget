@@ -6,7 +6,7 @@ The official toolkit for building **widget problems** on [Eolymp](https://eolymp
 - **Input helpers.** Grid, pick (single, multiple, path; works on SVG), drag-into-slots, sortable. Each handles mouse, touch and keyboard and locks itself in view mode.
 - **Base CSS.** A clean default look you theme with CSS variables.
 - **CLI.** `init` a starter, `dev` it in a local host that behaves like Eolymp, `pack` it into an upload-ready zip after checking the platform's rules.
-- **[AGENTS.md](./AGENTS.md).** The complete guide, written so an AI assistant can build a correct widget from it. Humans should read it too.
+- **[AGENTS.md](./AGENTS.md).** The complete guide: sandbox rules, every helper's answer shape, the checker, and a checklist before upload. `init` copies it into every new widget, so a coding assistant working there finds it.
 
 ## Quick start
 
