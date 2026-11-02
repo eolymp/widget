@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slots</title>
+  <link rel="stylesheet" href="../lib/widget-sdk.css">
+</head>
+<body>
+  <style>
+    .shelves { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .shelf { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--ew-muted); font-size: 13px; }
+    .shelf [data-slot] { width: 100%; min-height: 72px; }
+  </style>
+  <div class="ew-stack">
+    <div class="ew-row" id="tray">
+      <div data-item="apple">🍎</div>
+      <div data-item="carrot">🥕</div>
+      <div data-item="cheese">🧀</div>
+      <div data-item="fish">🐟</div>
+      <div data-item="pear">🍐</div>
+    </div>
+    <div class="shelves">
+      <div class="shelf"><div data-slot="fruit"></div>1</div>
+      <div class="shelf"><div data-slot="vegetable"></div>2</div>
+      <div class="shelf"><div data-slot="other"></div>3</div>
+    </div>
+  </div>
+  <script src="../lib/widget-sdk.js"></script>
+  <script src="./widget.js"></script>
+</body>
+</html>

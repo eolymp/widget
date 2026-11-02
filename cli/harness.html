@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Widget host</title>
+<style>
+  :root { --bg:#f4f6f8; --fg:#1a2027; --muted:#5f6b7a; --border:#d4dae1; --card:#fff; --accent:#2563eb; --bad:#dc2626; --warn:#b45309; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 16px; background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:1; }
+  header b { margin-right:8px; }
+  label { display:inline-flex; gap:6px; align-items:center; color:var(--muted); }
+  select, input, button, textarea { font:inherit; color:inherit; border:1px solid var(--border); border-radius:6px; background:var(--card); padding:4px 8px; }
+  button { cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  main { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:16px; padding:16px; align-items:start; }
+  @media (max-width: 900px) { main { grid-template-columns:1fr; } }
+  .stage { display:flex; justify-content:center; }
+  .frame { position:relative; width:100%; background:var(--card); border:1px solid var(--border); border-radius:8px; overflow:hidden; transition:max-width .2s; }
+  .frame iframe { display:block; width:100%; border:0; }
+  .overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:24px; text-align:center; color:var(--muted); background:var(--card); }
+  .overlay.error { color:var(--bad); }
+  .overlay[hidden] { display:none; }
+  aside { display:flex; flex-direction:column; gap:12px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; }
+  .card h3 { margin:0 0 8px; font-size:13px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); display:flex; justify-content:space-between; }
+  pre, textarea { margin:0; width:100%; font:12px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; white-space:pre-wrap; word-break:break-all; }
+  pre { max-height:260px; overflow:auto; }
+  textarea { min-height:80px; resize:vertical; }
+  .log { max-height:220px; overflow:auto; font:12px/1.5 ui-monospace, monospace; }
+  .log div { border-bottom:1px solid var(--bg); padding:2px 0; }
+  .log .err { color:var(--bad); }
+  .meta { color:var(--muted); font-weight:normal; text-transform:none; letter-spacing:0; }
+  .meta.over { color:var(--bad); }
+  .row { display:flex; gap:8px; margin-top:8px; }
+</style>
+</head>
+<body>
+<header>
+  <b>Widget host</b>
+  <label>Mode <select id="mode"><option value="solve">solve</option><option value="view">view</option></select></label>
+  <label>Locale <input id="locale" value="en" size="4"></label>
+  <label>Width <select id="width"><option value="360">Phone · 360</option><option value="640">Tablet · 640</option><option value="840" selected>Desktop · 840</option><option value="">Full</option></select></label>
+  <button id="reload">Reload widget</button>
+  <button id="get" class="primary">Get answer</button>
+</header>
+<main>
+  <div class="stage">
+    <div class="frame" id="frame">
+      <iframe id="widget" sandbox="allow-scripts allow-forms" title="widget"></iframe>
+      <div class="overlay" id="overlay">Loading…</div>
+    </div>
+  </div>
+  <aside>
+    <div class="card">
+      <h3>Answer <span class="meta" id="size"></span></h3>
+      <pre id="answer">—</pre>
+      <div class="row"><button id="clear">Clear draft</button></div>
+    </div>
+    <div class="card">
+      <h3>Restore an answer</h3>
+      <textarea id="restore" placeholder='{"cells": [[1,0],[0,1]]}'></textarea>
+      <div class="row"><button id="send">Send reload_answer</button></div>
+    </div>
+    <div class="card">
+      <h3>Messages <span class="meta" id="height"></span></h3>
+      <div class="log" id="log"></div>
+    </div>
+  </aside>
+</main>
+<script>
+  const PROTOCOL = "eolymp.widget.v1";
+  const SRC = __WIDGET_SRC__;
+  const MAX = 64 * 1024;
+  const $ = (id) => document.getElementById(id);
+  const frame = $("widget");
+  let sequence = 0;
+  let pending = new Map();
+  let draft = sessionStorage.getItem("draft") ?? undefined;
+  let minHeight = 320;
+
+  const log = (text, error) => {
+    const line = document.createElement("div");
+    line.textContent = `${new Date().toLocaleTimeString()}  ${text}`;
+    if (error) line.className = "err";
+    $("log").prepend(line);
+  };
+
+  const showAnswer = (text) => {
+    let pretty = text;
+    let valid = true;
+    try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch { valid = false; }
+    $("answer").textContent = pretty;
+    const size = new Blob([text]).size;
+    $("size").textContent = `${size} bytes${valid ? "" : " · not JSON"}${size > MAX ? " · over 64 KB" : ""}`;
+    $("size").className = "meta" + (!valid || size > MAX ? " over" : "");
+  };
+
+  const setHeight = (h) => {
+    $("height").textContent = h ? `height ${h}px` : "";
+    frame.style.height = Math.max(h || 0, minHeight) + "px";
+  };
+
+  const overlay = (text, error) => {
+    $("overlay").hidden = !text;
+    $("overlay").textContent = text || "";
+    $("overlay").className = "overlay" + (error ? " error" : "");
+  };
+
+  const send = (request) => {
+    const id = ++sequence;
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        pending.delete(id);
+        reject(new Error(`widget did not answer "${request.type}" within 10s`));
+      }, 10000);
+      pending.set(id, { resolve, reject, timer, type: request.type });
+      log(`→ ${request.type}${request.type === "load" ? ` (${request.mode}, ${request.locale})` : ""}`);
+      frame.contentWindow.postMessage({ protocol: PROTOCOL, id, request }, "*");
+    });
+  };
+
+  window.addEventListener("message", (event) => {
+    if (event.source !== frame.contentWindow) return;
+    const m = event.data;
+    if (!m || m.protocol !== PROTOCOL) return;
+
+    if (m.event) {
+      if (m.event.type === "answer_changed") {
+        draft = m.event.answer;
+        sessionStorage.setItem("draft", draft);
+        showAnswer(draft);
+        log("← answer_changed");
+      } else if (m.event.type === "height_changed") {
+        setHeight(m.event.height);
+      } else {
+        log(`← ${m.event.type}`);
+      }
+      return;
+    }
+
+    const call = pending.get(m.id);
+    if (!call) return;
+    clearTimeout(call.timer);
+    pending.delete(m.id);
+    if (m.error) {
+      log(`← ${call.type} failed: ${m.error}`, true);
+      call.reject(new Error(m.error));
+    } else {
+      log(`← ${call.type}`);
+      call.resolve(m.response);
+    }
+  });
+
+  frame.addEventListener("load", async () => {
+    for (const call of pending.values()) { clearTimeout(call.timer); }
+    pending = new Map();
+    overlay("Loading…");
+    setHeight(0);
+    try {
+      const response = await send({ type: "load", mode: $("mode").value, locale: $("locale").value || "en" });
+      if (response?.height) setHeight(response.height);
+      overlay(null);
+      if (draft !== undefined) await send({ type: "reload_answer", answer: draft });
+    } catch (error) {
+      overlay(`The widget failed to load: ${error.message}`, true);
+      log(error.message, true);
+    }
+  });
+
+  const reload = () => { frame.src = SRC + (SRC.includes("?") ? "&" : "?") + "t=" + Date.now(); };
+
+  $("reload").onclick = reload;
+  $("mode").onchange = reload;
+  $("locale").onchange = reload;
+  $("width").onchange = () => { $("frame").style.maxWidth = $("width").value ? $("width").value + "px" : ""; };
+  $("width").onchange();
+  $("get").onclick = async () => {
+    try { const r = await send({ type: "get_answer" }); showAnswer(r.answer); } catch (e) { log(e.message, true); }
+  };
+  $("clear").onclick = () => { draft = undefined; sessionStorage.removeItem("draft"); $("answer").textContent = "—"; $("size").textContent = ""; reload(); };
+  $("send").onclick = async () => {
+    try { await send({ type: "reload_answer", answer: $("restore").value }); } catch (e) { log(e.message, true); }
+  };
+
+  if (draft !== undefined) showAnswer(draft);
+  new EventSource("/__events").onmessage = () => { log("files changed, reloading"); reload(); };
+  reload();
+</script>
+</body>
+</html>
