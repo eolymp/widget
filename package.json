@@ -4,10 +4,18 @@
   "description": "Build widget (Bebras-style) problems for Eolymp: the host protocol, input helpers, base styles and a dev/pack CLI.",
   "license": "MIT",
   "type": "module",
-  "repository": "https://github.com/eolymp/widget-sdk",
   "homepage": "https://github.com/eolymp/widget-sdk#readme",
-  "keywords": ["eolymp", "bebras", "widget", "interactive", "task"],
-  "sideEffects": ["./dist/style.css", "./dist/widget-sdk.js"],
+  "keywords": [
+    "eolymp",
+    "bebras",
+    "widget",
+    "interactive",
+    "task"
+  ],
+  "sideEffects": [
+    "./dist/style.css",
+    "./dist/widget-sdk.js"
+  ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -24,9 +32,15 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "eolymp-widget": "./cli/index.js"
+    "eolymp-widget": "cli/index.js"
   },
-  "files": ["dist", "cli", "template", "AGENTS.md", "LICENSE"],
+  "files": [
+    "dist",
+    "cli",
+    "template",
+    "AGENTS.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=20"
   },
@@ -47,5 +61,9 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eolymp/widget-sdk.git"
   }
 }
