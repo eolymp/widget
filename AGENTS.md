@@ -30,9 +30,9 @@ The page runs in a sandboxed iframe with no same-origin access:
 ## Workflow
 
 ```sh
-npx @eolymp/widget-sdk init my-widget   # starter: index.html, widget.js, style.css, lib/
-npx @eolymp/widget-sdk dev my-widget    # http://localhost:4300 hosts it the way Eolymp does
-npx @eolymp/widget-sdk pack my-widget   # checks the rules above, writes my-widget.zip
+npx @eolymp/widget init my-widget   # starter: index.html, widget.js, style.css, lib/
+npx @eolymp/widget dev my-widget    # http://localhost:4300 hosts it the way Eolymp does
+npx @eolymp/widget pack my-widget   # checks the rules above, writes my-widget.zip
 ```
 
 `dev` runs the widget under the production sandbox and a matching content policy, so anything that breaks on Eolymp breaks there too. It shows the live answer JSON and its size, switches between `solve` and `view` mode and between phone, tablet and desktop widths, and can send any answer back in. It reloads when files change and restores the last answer, as Eolymp does with drafts.
