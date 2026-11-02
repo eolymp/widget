@@ -6,7 +6,7 @@ The official toolkit for building **widget problems** on [Eolymp](https://eolymp
 - **Input helpers.** Grid, pick (single, multiple, path; works on SVG), drag-into-slots, sortable. Each handles mouse, touch and keyboard and locks itself in view mode.
 - **Base CSS.** A clean default look you theme with CSS variables.
 - **CLI.** `init` a starter, `dev` it in a local host that behaves like Eolymp, `pack` it into an upload-ready zip after checking the platform's rules.
-- **[AGENTS.md](./AGENTS.md).** The complete guide, written so an AI assistant can build a correct widget from it. Humans should read it too.
+- **[AGENTS.md](./AGENTS.md).** The complete guide: sandbox rules, every helper's answer shape, the checker, and a checklist before upload. `init` copies it into every new widget, so a coding assistant working there finds it.
 
 ## Quick start
 
@@ -23,24 +23,9 @@ const board = eolymp.grid("#board", { rows: 4, cols: 4 });
 eolymp.widget({ answer: board });
 ```
 
-### With a bundler
-
-```sh
-npm install @eolymp/widget-sdk
-```
-
-```js
-import { pickPath, widget } from "@eolymp/widget-sdk";
-import "@eolymp/widget-sdk/style.css";
-
-widget({ answer: pickPath("#map", { start: "A" }) });
-```
-
-Set `base: "./"` in Vite, develop with `npx @eolymp/widget-sdk dev --url http://localhost:5173/`, and pack the build with `npx @eolymp/widget-sdk pack dist`.
-
 ### Why the SDK is copied into the bundle
 
-Widgets run under a content policy that allows scripts only from Eolymp's asset host, so a widget cannot load the SDK from a CDN. `init` copies `widget-sdk.js` and `widget-sdk.css` into `lib/`, and a bundler inlines them. The standalone build is also published at `@eolymp/widget-sdk/widget-sdk.js` (for example on jsDelivr or unpkg) to download, not to link.
+Widgets run under a content policy that allows scripts only from Eolymp's asset host, so a widget cannot load the SDK from a CDN. `init` copies `widget-sdk.js` and `widget-sdk.css` into `lib/`. The standalone build is also published at `@eolymp/widget-sdk/widget-sdk.js` (for example on jsDelivr or unpkg) to download, not to link.
 
 ## The principle
 
