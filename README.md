@@ -27,10 +27,6 @@ eolymp.widget({ answer: board });
 
 Widgets run under a content policy that allows scripts only from Eolymp's asset host, so a widget cannot load the SDK from a CDN. `init` copies `widget-sdk.js` and `widget-sdk.css` into `lib/`. The standalone build is also published at `@eolymp/widget-sdk/widget-sdk.js` (for example on jsDelivr or unpkg) to download, not to link.
 
-## The principle
-
-The widget is a **fancy input**, nothing more. The question, the rules, the submit button and the verdict all live in Eolymp's page. A widget with its own text or buttons looks out of place, and one that hints at correctness leaks the answer. Grading happens only in the problem's checker, which receives the widget's JSON as the participant's output.
-
 ## API
 
 | Export | Returns | Answer shape |
