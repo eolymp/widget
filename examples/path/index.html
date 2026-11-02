@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Path</title>
+  <link rel="stylesheet" href="../lib/widget-sdk.css">
+</head>
+<body>
+  <style>
+    #map line { stroke: var(--ew-border); stroke-width: 4; }
+    #map circle { fill: var(--ew-surface); stroke: var(--ew-fg); stroke-width: 2; }
+    #map circle[data-picked] { fill: var(--ew-accent-soft); }
+    #map text { font: 600 16px var(--ew-font); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  </style>
+  <div class="ew-center">
+    <svg id="map" viewBox="0 0 420 260" width="420">
+      <g id="edges"></g>
+      <g id="nodes"></g>
+    </svg>
+  </div>
+  <script src="../lib/widget-sdk.js"></script>
+  <script src="./widget.js"></script>
+</body>
+</html>
