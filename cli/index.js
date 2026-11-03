@@ -43,7 +43,7 @@ const HELP = `eolymp-widget — build widget problems for Eolymp
   eolymp-widget dev [dir] [--port N]    run the widget in a local host that behaves like Eolymp
   eolymp-widget pack [dir] [-o file]    check the folder against the platform rules and zip it
 
-Docs: https://github.com/eolymp/widget-sdk#readme`;
+Docs: https://github.com/eolymp/widget#readme`;
 
 function args(list) {
   const out = { _: [] };
