@@ -50,7 +50,7 @@ The first number is figure 1's stilts (5 is stilts 6, counting from 0), the seco
 
 A few rules of thumb for any task:
 
-- Record the final state, not the clicks that led to it.
+- Record the final state, not the clicks that led to it, unless the moves are part of the task (for example, "solve it in the fewest moves").
 - Use stable ids, never pixel positions or the order of elements on the page.
 - Never put correctness into the answer, such as `"correct": true`. The checker decides.
 
