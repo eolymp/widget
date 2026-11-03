@@ -20,33 +20,29 @@ const bridges = [
   ["D", "F", 9],
 ];
 
-const svg = "http://www.w3.org/2000/svg";
 const map = document.getElementById("map");
-
-const draw = (parent, tag, attributes, text) => {
-  const element = document.createElementNS(svg, tag);
-  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
-  if (text !== undefined) element.textContent = text;
-  parent.append(element);
-  return element;
+const svg = (tag, attrs, parent) => {
+  const element = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [key, value] of Object.entries(attrs)) element.setAttribute(key, value);
+  return parent.appendChild(element);
 };
 
 for (const [from, to, planks] of bridges) {
   const [x1, y1] = islands[from];
   const [x2, y2] = islands[to];
-  const bridge = draw(map, "g", { class: "bridge", "data-id": from + to, "aria-label": `Bridge ${from}–${to}, ${planks} planks` });
-  draw(bridge, "line", { class: "hit", x1, y1, x2, y2 });
-  draw(bridge, "line", { class: "deck", x1, y1, x2, y2 });
+  const bridge = svg("g", { class: "bridge", "data-id": from + to, "aria-label": `Bridge ${from}–${to}, ${planks} planks` }, map);
+  svg("line", { class: "hit", x1, y1, x2, y2 }, bridge);
+  svg("line", { class: "deck", x1, y1, x2, y2 }, bridge);
   const mx = (x1 + x2) / 2;
   const my = (y1 + y2) / 2;
-  draw(bridge, "circle", { class: "cost", cx: mx, cy: my, r: 15 });
-  draw(bridge, "text", { class: "cost-label", x: mx, y: my }, planks);
+  svg("circle", { class: "cost", cx: mx, cy: my, r: 15 }, bridge);
+  svg("text", { class: "cost-label", x: mx, y: my }, bridge).textContent = planks;
 }
 
 for (const [name, [x, y]] of Object.entries(islands)) {
-  const island = draw(map, "g", { class: "island" });
-  draw(island, "circle", { cx: x, cy: y, r: 30 });
-  draw(island, "text", { x, y }, name);
+  const island = svg("g", { class: "island" }, map);
+  svg("circle", { cx: x, cy: y, r: 30 }, island);
+  svg("text", { x, y }, island).textContent = name;
 }
 
 const built = eolymp.pickMany(map, { items: "[data-id]" });

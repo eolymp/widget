@@ -114,13 +114,12 @@
     }
 
     [data-item] {
+      width: calc(2.4 * var(--u));
       height: calc(var(--h) * var(--u));
-      width: auto;
-      max-width: none;
       padding: 0;
       border: 0;
-      border-radius: 0;
-      background: none;
+      border-radius: calc(1.2 * var(--u)) calc(1.2 * var(--u)) 4px 4px;
+      background: linear-gradient(var(--hat) 0 calc(1.5 * var(--u)), var(--body) 0);
       box-shadow: none;
     }
 
@@ -138,19 +137,14 @@
       outline-offset: 4px;
     }
 
-    .figure {
-      width: calc(2.4 * var(--u));
-      border-radius: calc(1.2 * var(--u)) calc(1.2 * var(--u)) 4px 4px;
-      background: linear-gradient(var(--hat) 0 calc(1.5 * var(--u)), var(--body) 0);
-    }
   </style>
   <div class="scene" id="scene">
     <div class="tray">
-      <div class="figure" data-item="0" aria-label="Figure 1" style="--h: 12"></div>
-      <div class="figure" data-item="1" aria-label="Figure 2" style="--h: 9"></div>
-      <div class="figure" data-item="2" aria-label="Figure 3" style="--h: 6"></div>
-      <div class="figure" data-item="3" aria-label="Figure 4" style="--h: 10"></div>
-      <div class="figure" data-item="4" aria-label="Figure 5" style="--h: 11"></div>
+      <div data-item="0" aria-label="Figure 1" style="--h: 12"></div>
+      <div data-item="1" aria-label="Figure 2" style="--h: 9"></div>
+      <div data-item="2" aria-label="Figure 3" style="--h: 6"></div>
+      <div data-item="3" aria-label="Figure 4" style="--h: 10"></div>
+      <div data-item="4" aria-label="Figure 5" style="--h: 11"></div>
     </div>
     <div class="yard" id="yard">
       <div data-slot="0" aria-label="Stilts 1" style="--s: 3"><i class="pole"></i></div>

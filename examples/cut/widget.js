@@ -1,4 +1,3 @@
-const SVG = "http://www.w3.org/2000/svg";
 const FIELD = { left: 20, top: 25, right: 625, bottom: 330 };
 const WIDTH = FIELD.right - FIELD.left;
 const HEIGHT = FIELD.bottom - FIELD.top;
@@ -17,20 +16,22 @@ const INITIAL = [1, 2].map((n) => {
   return [FIELD.left, y, FIELD.right, y];
 });
 
-const meadow = document.getElementById("meadow");
-const element = (name, attributes, parent) => {
-  const node = document.createElementNS(SVG, name);
-  Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, value));
-  parent.append(node);
+const attrs = (node, values) => {
+  for (const [key, value] of Object.entries(values)) node.setAttribute(key, value);
   return node;
 };
+const svg = (tag, values, parent) =>
+  parent.appendChild(attrs(document.createElementNS("http://www.w3.org/2000/svg", tag), values));
 
-MUSHROOMS.forEach(([color, x, y, size]) =>
-  element("circle", { class: "mushroom", "data-color": color, cx: x + size / 2, cy: y + size / 2, r: size / 2 }, document.getElementById("mushrooms")),
-);
+const meadow = document.getElementById("meadow");
+for (const [color, x, y, size] of MUSHROOMS) {
+  svg("circle", { class: "mushroom", "data-color": color, cx: x + size / 2, cy: y + size / 2, r: size / 2 }, document.getElementById("mushrooms"));
+}
 
 const round = (v) => Math.round(v * 10) / 10;
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+const ends = (line) => [{ x: line[0], y: line[1] }, { x: line[2], y: line[3] }];
+const flat = ([a, b]) => [a.x, a.y, b.x, b.y];
 
 const extend = (a, b) => {
   const dx = b.x - a.x;
@@ -69,107 +70,89 @@ const fromPerimeter = (t) => {
 
 const normalize = (value) => {
   if (!Array.isArray(value) || value.length !== INITIAL.length) return INITIAL;
-  const lines = value.map((line) => {
-    if (!Array.isArray(line) || line.length !== 4 || !line.every(Number.isFinite)) return null;
-    const ends = extend({ x: line[0], y: line[1] }, { x: line[2], y: line[3] });
-    return ends && [ends[0].x, ends[0].y, ends[1].x, ends[1].y];
-  });
-  return lines.includes(null) ? INITIAL : lines;
+  const lines = value.map((line) =>
+    Array.isArray(line) && line.length === 4 && line.every(Number.isFinite) ? extend(...ends(line)) : null,
+  );
+  return lines.includes(null) ? INITIAL : lines.map(flat);
 };
 
 const lines = eolymp.state(INITIAL);
 const answer = {
-  get: lines.get,
+  ...lines,
   set: (value) => lines.set(normalize(value)),
   update: (change) => answer.set(change(lines.get())),
-  subscribe: lines.subscribe,
 };
 
-const cuts = INITIAL.map(() => element("line", { class: "cut" }, document.getElementById("lines")));
-const handles = INITIAL.flatMap((_, line) =>
-  [0, 1].map((end) =>
-    element("circle", {
-      class: "handle",
-      r: 10,
-      tabindex: 0,
-      role: "slider",
-      "aria-label": `Line ${line + 1}, end ${end + 1}`,
-      "data-line": line,
-      "data-end": end,
-    }, document.getElementById("handles")),
-  ),
-);
-
-const point = (line, end) => ({ x: line[end * 2], y: line[end * 2 + 1] });
-
-const move = (index, end, target) => {
+const move = (index, end, target) =>
   lines.update((current) =>
     current.map((line, i) => {
       if (i !== index) return line;
-      const ends = [point(line, 0), point(line, 1)];
-      ends[end] = target;
-      return [ends[0].x, ends[0].y, ends[1].x, ends[1].y];
+      const points = ends(line);
+      points[end] = target;
+      return flat(points);
     }),
   );
-};
+
+const cuts = INITIAL.map(() => svg("line", { class: "cut" }, document.getElementById("lines")));
+const handles = INITIAL.flatMap((_, index) =>
+  [0, 1].map((end) => ({
+    index,
+    end,
+    node: svg("circle", { class: "handle", r: 10, tabindex: 0, role: "slider", "aria-label": `Line ${index + 1}, end ${end + 1}` }, document.getElementById("handles")),
+  })),
+);
 
 const render = (current) => {
-  meadow.toggleAttribute("data-readonly", eolymp.readonly());
-  current.forEach((line, i) => {
-    const [x1, y1, x2, y2] = line;
-    Object.entries({ x1, y1, x2, y2 }).forEach(([key, value]) => cuts[i].setAttribute(key, value));
-  });
-  handles.forEach((handle) => {
-    const { x, y } = point(current[handle.dataset.line], handle.dataset.end);
-    handle.setAttribute("cx", x);
-    handle.setAttribute("cy", y);
-  });
+  current.forEach(([x1, y1, x2, y2], i) => attrs(cuts[i], { x1, y1, x2, y2 }));
+  for (const { index, end, node } of handles) {
+    const { x, y } = ends(current[index])[end];
+    attrs(node, { cx: x, cy: y });
+  }
 };
 lines.subscribe(render);
 render(lines.get());
 
 const local = (event) => {
   const p = new DOMPoint(event.clientX, event.clientY).matrixTransform(meadow.getScreenCTM().inverse());
-  return {
-    x: clamp(p.x, FIELD.left + 2, FIELD.right - 2),
-    y: clamp(p.y, FIELD.top + 2, FIELD.bottom - 2),
-  };
+  return { x: clamp(p.x, FIELD.left + 2, FIELD.right - 2), y: clamp(p.y, FIELD.top + 2, FIELD.bottom - 2) };
 };
 
-handles.forEach((handle) => {
-  const index = Number(handle.dataset.line);
-  const end = Number(handle.dataset.end);
-  const other = () => point(lines.get()[index], 1 - end);
+const ARROWS = { ArrowRight: [1, 0], ArrowLeft: [-1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
 
-  handle.addEventListener("pointerdown", (event) => {
+for (const { index, end, node } of handles) {
+  const own = () => ends(lines.get()[index])[end];
+  const other = () => ends(lines.get()[index])[1 - end];
+
+  node.addEventListener("pointerdown", (event) => {
     if (eolymp.readonly()) return;
     event.preventDefault();
-    handle.focus({ preventScroll: true });
-    handle.setPointerCapture(event.pointerId);
-    handle.toggleAttribute("data-dragging", true);
+    node.focus({ preventScroll: true });
+    node.setPointerCapture(event.pointerId);
+    node.toggleAttribute("data-dragging", true);
   });
 
-  handle.addEventListener("pointermove", (event) => {
-    if (!handle.hasPointerCapture(event.pointerId)) return;
-    const ends = extend(other(), local(event));
-    if (ends) move(index, end, ends[1]);
+  node.addEventListener("pointermove", (event) => {
+    if (!node.hasPointerCapture(event.pointerId)) return;
+    const points = extend(other(), local(event));
+    if (points) move(index, end, points[1]);
   });
 
-  const release = () => handle.toggleAttribute("data-dragging", false);
-  handle.addEventListener("pointerup", release);
-  handle.addEventListener("pointercancel", release);
+  const release = () => node.toggleAttribute("data-dragging", false);
+  node.addEventListener("pointerup", release);
+  node.addEventListener("pointercancel", release);
 
-  handle.addEventListener("keydown", (event) => {
-    if (eolymp.readonly()) return;
-    const step = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[event.key];
-    if (!step) return;
+  node.addEventListener("keydown", (event) => {
+    const arrow = ARROWS[event.key];
+    if (!arrow || eolymp.readonly()) return;
     event.preventDefault();
-    const at = toPerimeter(point(lines.get()[index], end));
-    const target = fromPerimeter(at + step * (event.shiftKey ? 1 : 5));
+    const from = own();
+    const step = event.shiftKey ? 1 : 5;
+    const toward = (p) => (p.x - from.x) * arrow[0] + (p.y - from.y) * arrow[1];
+    const target = [step, -step].map((d) => fromPerimeter(toPerimeter(from) + d)).sort((a, b) => toward(b) - toward(a))[0];
     const far = other();
-    if (Math.hypot(target.x - far.x, target.y - far.y) < 1) return;
+    if (toward(target) <= 0 || Math.hypot(target.x - far.x, target.y - far.y) < 1) return;
     move(index, end, { x: round(target.x), y: round(target.y) });
   });
-});
+}
 
 eolymp.widget({ answer });
