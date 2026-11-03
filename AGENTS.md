@@ -86,7 +86,7 @@ eolymp.widget({
 
 Everything that holds part of an answer is a `Value`: `{ get(), set(v), update(fn), subscribe(fn) }`. Every helper below returns one. Pass a Value as `answer` and the SDK does the rest: it reads the answer from it, restores into it without echoing a change back, and reports every change as a draft. When the participant starts over, the Value goes back to what it held when `eolymp.widget()` was called.
 
-- `eolymp.state(initial)` is a plain Value for custom widgets.
+- `eolymp.state(initial, normalize?)` is a plain Value for custom widgets. `normalize` receives every value given to `set`, including a restored answer, and returns the value to keep.
 - `eolymp.combine({ a: valueA, b: valueB })` merges several Values into one answer `{ a, b }`. Use it for tasks with several parts.
 
 ### Mode
@@ -172,7 +172,7 @@ eolymp.widget({ answer });
 Rules for custom code:
 
 - Never mutate the value in place. Create a new one with `set` or `update`, so that changes are reported.
-- `set` may receive **any JSON** when an answer is restored: an old draft, an earlier version's shape, or garbage. Validate it, and fall back to an empty state instead of throwing.
+- `set` may receive **any JSON** when an answer is restored: an old draft, an earlier version's shape, or garbage. Pass a `normalize` function to `eolymp.state` that validates it and falls back to an empty state instead of throwing.
 - Ignore input when `eolymp.readonly()` is true.
 - Use `<button>` for anything clickable, or give the element `tabindex="0"` and handle Enter and Space.
 

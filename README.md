@@ -33,7 +33,7 @@ Widgets run under a content policy that allows scripts only from Eolymp's asset 
 |---|---|---|
 | `widget({ answer, load?, getHeight? })` | — | registers the widget (call once) |
 | `widget({ getAnswer, reloadAnswer?, load? })` | — | low-level form; call `answerChanged()` on change |
-| `state(initial)` | `Value<T>` | whatever you put in |
+| `state(initial, normalize?)` | `Value<T>` | whatever you put in |
 | `combine({ a, b })` | `Value<{a, b}>` | `{ "a": …, "b": … }` |
 | `grid(root, { rows, cols, values?, label?, locked? })` | `Value<V[][]>` | `[[0,1],[1,0]]` |
 | `pickOne(root, { items? })` | `Value<string \| null>` | `"B"` |

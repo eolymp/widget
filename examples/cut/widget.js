@@ -76,12 +76,7 @@ const normalize = (value) => {
   return lines.includes(null) ? INITIAL : lines.map(flat);
 };
 
-const lines = eolymp.state(INITIAL);
-const answer = {
-  ...lines,
-  set: (value) => lines.set(normalize(value)),
-  update: (change) => answer.set(change(lines.get())),
-};
+const lines = eolymp.state(INITIAL, normalize);
 
 const move = (index, end, target) =>
   lines.update((current) =>
@@ -155,4 +150,4 @@ for (const { index, end, node } of handles) {
   });
 }
 
-eolymp.widget({ answer });
+eolymp.widget({ answer: lines });
