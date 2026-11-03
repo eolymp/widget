@@ -4,7 +4,7 @@
   "description": "Build widget (Bebras-style) problems for Eolymp: the host protocol, input helpers, base styles and a dev/pack CLI.",
   "license": "MIT",
   "type": "module",
-  "homepage": "https://github.com/eolymp/widget-sdk#readme",
+  "homepage": "https://github.com/eolymp/widget#readme",
   "keywords": [
     "eolymp",
     "bebras",
@@ -64,6 +64,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eolymp/widget-sdk.git"
+    "url": "git+https://github.com/eolymp/widget.git"
   }
 }
