@@ -2,7 +2,7 @@
 
 This tutorial builds one widget problem from start to finish: the widget, the checker, and the problem on Eolymp. It takes the path a real task takes, so each step is one you will repeat for your own problems.
 
-You need [Node.js](https://nodejs.org) 20 or later and an Eolymp space where you can create problems.
+You need [Node.js](https://nodejs.org) 20 or later and an [Eolymp space](https://console.eolymp.com) where you can create problems.
 
 ## The task
 
