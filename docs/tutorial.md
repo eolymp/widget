@@ -1,44 +1,54 @@
 # Tutorial: your first widget problem
 
-This tutorial builds one widget problem from start to finish: the widget, the checker, and the problem on Eolymp. It takes the path a real task takes, so each step is one you will repeat for your own problems.
+In this tutorial we'll build a complete widget problem together, from an empty folder to a problem participants can solve on Eolymp. It's a small task, but it goes through every step you'll take with your own problems.
 
-You need [Node.js](https://nodejs.org) 20 or later and an [Eolymp space](https://console.eolymp.com) where you can create problems.
+You'll need [Node.js](https://nodejs.org) 20 or later and an [Eolymp space](https://console.eolymp.com) where you can create problems.
 
 ## The task
 
-Five figures want to walk on stilts. There are six pairs of stilts of different heights. Put each figure on a pair of stilts so that the tops of all their hats are at the same height.
+Five figures want to walk on stilts, and there are six pairs of stilts of different heights. The participant has to put each figure on stilts so that all the hats end up at the same height.
 
-| Figure | 1 | 2 | 3 | 4 | 5 |   |
+| Figure | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|
+| Height | 12 | 9 | 6 | 10 | 11 |
+
+| Stilts | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---|---|---|---|---|---|
-| Height | 12 | 9 | 6 | 10 | 11 | |
-| **Stilts** | **1** | **2** | **3** | **4** | **5** | **6** |
 | Height | 3 | 4 | 2 | 6 | 7 | 1 |
 
-One pair of stilts is left over. The answer is figure 1 on stilts 6, figure 2 on stilts 2, figure 3 on stilts 5, figure 4 on stilts 1 and figure 5 on stilts 3: every hat ends at 13.
+The solution: every hat can reach height 13.
 
-## 1. Split the task into statement, widget and checker
+- Figure 1 → stilts 6 (12 + 1)
+- Figure 2 → stilts 2 (9 + 4)
+- Figure 3 → stilts 5 (6 + 7)
+- Figure 4 → stilts 1 (10 + 3)
+- Figure 5 → stilts 3 (11 + 2)
 
-A widget problem has three parts, and each has one job:
+Stilts 4 are left over.
 
-- **The statement** holds all the text: the story, the rules, what to do. It is written in the console like any other statement.
-- **The widget** is only the answer input: the figures and the stilts, which the participant drags. It has no text, no "Check" button, and never says whether an answer is right. The page around it already has the Submit button.
-- **The checker** decides whether the answer is right.
+## 1. What we'll make
 
-So the statement for this task is the paragraph above. Everything that follows is about the other two parts.
+Every widget problem is made of three things:
 
-## 2. Design the answer
+- **A statement.** All the text goes here: the story, the rules, what to do. You write it in the console, like any other problem statement.
+- **A widget.** A small web page under the statement where the participant builds the answer. Here, that's the figures and the stilts to drag them onto. It's only the answer input: no text, no "Check" button, and it never says whether the answer is right. The page already has a Submit button.
+- **A checker.** A small program that gets the participant's answer and decides whether it's right.
 
-When the participant submits, the widget hands Eolymp a JSON document: the answer. Only your widget and your checker ever read it, so choose the shape that makes the checker simple.
+For this task, the statement is the description and the two tables above (without the solution, of course). So most of this tutorial is about the widget and the checker.
 
-Here the question is "which stilts does each figure stand on", so the answer is a list with one stilts number per figure, counting from 0:
+## 2. Decide what the answer looks like
+
+When the participant presses Submit, the widget hands over its answer as JSON. Nobody but your widget and your checker ever reads it, so pick whatever shape makes the checker easiest to write.
+
+The question here is "which stilts does each figure stand on?", so let's answer with a list: one stilts number per figure, counting from 0. The solution above becomes:
 
 ```json
 [5, 1, 4, 0, 2]
 ```
 
-That is the correct answer: figure 1 on stilts 6 (index 5), figure 2 on stilts 2 (index 1), and so on. While a figure is still off the stilts, the answer is `null`.
+The first number is figure 1's stilts (5 is stilts 6, counting from 0), the second is figure 2's, and so on. Until every figure is on stilts, the answer is `null`.
 
-Rules of thumb:
+A few rules of thumb for any task:
 
 - Record the final state, not the clicks that led to it.
 - Use stable ids, never pixel positions or the order of elements on the page.
@@ -46,14 +56,14 @@ Rules of thumb:
 
 ## 3. Create the widget
 
-Keep the widget and the checker side by side in one folder, with the checker outside the widget:
+Make a folder for the problem and create the widget inside it. Later the checker goes next to the widget, not inside it; step 7 explains why.
 
 ```sh
 mkdir stilts && cd stilts
 npx @eolymp/widget init widget
 ```
 
-`init` creates a starter in `widget/`:
+`init` gives you a starter in `widget/`:
 
 ```
 stilts/
@@ -68,19 +78,19 @@ stilts/
         └── widget-sdk.css
 ```
 
-`lib/` is the SDK itself. It is copied into the widget because a widget may only load files from its own archive. Don't edit it.
+`lib/` is the SDK itself. It's copied in because a widget can only load files from its own archive, never from the internet. You won't need to touch it.
 
-Start the local host:
+Now start the local preview:
 
 ```sh
 npx @eolymp/widget dev widget
 ```
 
-and open http://localhost:4300. The page runs the widget the way Eolymp does, and shows next to it the answer the widget produces. Keep it open: it reloads when you save a file.
+and open http://localhost:4300. It runs your widget the same way Eolymp will, and shows the answer next to it as you play. Keep it open while you work: it reloads every time you save a file.
 
 ## 4. Lay out the figures and the stilts
 
-The SDK has a helper for "drag things into places": `eolymp.slots`. It looks for elements with `data-item` (the things you drag) and `data-slot` (the places they go). Items not in a slot sit where they are in the page.
+For "drag things into places" the SDK has a ready-made helper, `eolymp.slots`. You mark the things to drag with `data-item` and the places they go with `data-slot`, and it does the rest. Anything not yet in a slot stays where it is in the page.
 
 Replace `widget/index.html` with:
 
@@ -119,9 +129,9 @@ Replace `widget/index.html` with:
 </html>
 ```
 
-The heights live in the markup as CSS variables, `--h` for a figure and `--s` for stilts, so the stylesheet can draw them to scale later. The `aria-label`s name each element for screen readers and keyboard users.
+Each figure carries its height in `--h` and each pair of stilts in `--s`, so later the stylesheet can draw them to scale. The `aria-label`s give every element a name for screen readers and keyboard users.
 
-Replace `widget/widget.js` with:
+Now replace `widget/widget.js` with just two lines:
 
 ```js
 const placement = eolymp.slots("#scene");
@@ -129,19 +139,19 @@ const placement = eolymp.slots("#scene");
 eolymp.widget({ answer: placement });
 ```
 
-`eolymp.slots` turns the markup into a working drag-and-drop: by mouse, by touch, by tapping an item and then a slot, and by keyboard. Each slot holds one item, and dropping onto a full one swaps the two. `eolymp.widget` connects it to Eolymp: it reports the answer, keeps a draft while the participant works, and shows a past submission back.
+That's already a working widget. `eolymp.slots` makes the figures draggable with a mouse, by touch, by tapping a figure and then the stilts, and from the keyboard. Each pair of stilts holds one figure, and dropping onto a taken pair swaps them. `eolymp.widget` connects it all to Eolymp: it reports the answer, saves a draft as the participant works, and shows past submissions back.
 
-Drag a figure onto stilts in the dev page. It works, unstyled, and the answer panel shows what `slots` produces:
+Try it in the preview: drag a figure onto some stilts. It doesn't look like much yet, but it works, and the answer panel shows what `slots` reports:
 
 ```json
 { "0": [], "1": ["2"], "2": [], "3": [], "4": [], "5": [] }
 ```
 
-That is the shape `slots` always uses: for each slot, the items in it. It is correct, but it is not the answer designed in step 2.
+That's `slots`' own format: every slot with the items in it. It's accurate, but it isn't the simple list we decided on in step 2. Let's fix that.
 
 ## 5. Turn the placement into your answer
 
-A helper returns a `Value`: an object with `get()`, `set(value)`, `update(change)` and `subscribe(listener)`. `eolymp.widget` reads the answer with `get`, restores a saved one with `set`, and listens with `subscribe`. To answer in your own shape, wrap the helper's Value in one that translates both ways.
+Every helper gives you back a `Value`: an object with `get()`, `set(value)`, `update(change)` and `subscribe(listener)`. `eolymp.widget` uses `get` to read the answer, `set` to restore a saved one, and `subscribe` to hear about changes. To answer in your own format, wrap the helper's Value in your own object that translates in both directions.
 
 Replace `widget/widget.js` with:
 
@@ -171,14 +181,14 @@ const answer = {
 eolymp.widget({ answer });
 ```
 
-- `get` finds the stilts under each figure. Until every figure is placed it returns `null`.
-- `set` does the reverse: it builds the placement from a list. It is called when a draft or a past submission is restored, and it may receive anything, including an older shape or garbage, so it treats anything that is not a list as "nothing placed" instead of throwing.
+- `get` looks up which stilts each figure is on. If any figure is still waiting, it returns `null`.
+- `set` goes the other way: it takes a list and puts the figures in place. It runs when a draft or a past submission is restored, and it can be handed anything, even an old format or garbage. So instead of crashing on something unexpected, it treats it as "nothing placed yet".
 
-Place all five figures and the answer panel shows a list such as `[5,1,4,0,2]`.
+Place all five figures and the answer panel now shows a list like `[5,1,4,0,2]`.
 
 ## 6. Draw it
 
-The SDK's stylesheet gives items and slots a plain default look: cards and dashed boxes. This task needs figures and stilts drawn to scale instead. Replace `widget/style.css` with:
+Out of the box, the SDK draws items as cards and slots as dashed boxes. For this task we want figures and stilts drawn to scale instead. Replace `widget/style.css` with:
 
 ```css
 :root {
@@ -244,19 +254,19 @@ The SDK's stylesheet gives items and slots a plain default look: cards and dashe
 }
 ```
 
-How it works:
+What's going on:
 
-- `--u` is one unit of height. A figure is `--h` units tall, a pole is `--s` units tall, and the lines behind the yard mark every unit so heights can be counted.
-- Each slot is a column with its pole drawn as a background along the bottom and the same amount of bottom padding, so a figure dropped in it stands on top of the pole.
-- `[data-over]` is set by the SDK on the slot under a dragged item. Here it tints the slot so the drop target is clear.
-- Every colour is a variable, and `:root[data-theme="dark"]` redefines them. Eolymp tells the widget which theme the page uses, and the SDK sets `data-theme` on `<html>`. The SDK's own variables, such as `--ew-border` and `--ew-accent-soft`, already switch with it.
-- There is no box around the scene. Eolymp shows the widget in a frame of its own, and a second frame inside it looks out of place.
+- `--u` is one unit of height. A figure is `--h` units tall and a pole `--s` units tall. The faint lines behind the stilts mark every unit, so participants can count.
+- Each pair of stilts is drawn as a pole along the bottom of its slot, with the same amount of padding underneath, so a figure dropped there stands right on top of the pole.
+- While a figure is dragged over stilts, the SDK marks them with `[data-over]`. We tint them so it's clear where the figure will land.
+- All colours are variables, with a second set under `:root[data-theme="dark"]`. When the participant's page is dark, the SDK sets `data-theme="dark"` on `<html>` and the dark colours kick in. The SDK's own variables, like `--ew-border`, switch on their own.
+- There's no box around the scene on purpose. Eolymp already shows the widget in a frame, and a box inside it looks like a second frame.
 
 ## 7. Write the checker
 
-A widget problem has no tests. Each submission is judged once, for 100 points, by the checker alone. The checker gets the widget's answer as the participant's output file; the input and answer files are empty, so the checker holds everything the task expects.
+Unlike a programming problem, a widget problem has no tests. Each submission is checked once, worth 100 points, and the checker alone decides. It receives the widget's answer as the participant's "output file". The input and answer files are empty, so everything the task expects lives in the checker itself.
 
-Create `checker.js` next to the `widget` folder, not inside it. Everything inside the widget folder is uploaded and can be read by the participant's browser, and the checker gives the solution away.
+Create `checker.js` next to the `widget` folder, not inside it. Everything in the widget folder gets uploaded and is readable by anyone's browser, and a checker there would give the solution away.
 
 ```js
 const fs = require("fs");
@@ -291,15 +301,15 @@ if (tops.every((top) => top === tops[0])) {
 verdict(`The hats are at ${tops.join(", ")}.`, 1);
 ```
 
-This is a checker in Eolymp mode. It is called with three files, input, output and answer, and the output file (`process.argv[3]`) holds the widget's JSON. It exits 0 for a correct answer and 1 for a wrong one, and what it prints is shown with the verdict.
+This checker runs in Eolymp mode. It's called with three files (input, output and answer), and the output file, `process.argv[3]`, holds the widget's JSON. It exits with 0 when the answer is right and 1 when it's wrong, and whatever it prints is shown to the participant with the verdict.
 
-Notice what it does not do:
+A few things it deliberately doesn't do:
 
-- It never compares the answer with `[5,1,4,0,2]`. It checks the property the task asks for, that all hats are level, so any other correct placement would pass too.
-- It never compares the JSON as text. `[5, 1, 4, 0, 2]` and `[5,1,4,0,2]` are the same answer.
-- It trusts nothing. The answer comes from a browser, so the checker validates its shape before using it.
+- It doesn't compare the answer with `[5,1,4,0,2]`. It checks what the task actually asks, that all hats are level, so any other correct placement passes too.
+- It doesn't compare the JSON as text. `[5, 1, 4, 0, 2]` and `[5,1,4,0,2]` are the same answer.
+- It doesn't trust the answer. It comes from a browser, so the checker checks its shape before using it.
 
-Try it on a few answers, with an empty file standing in for the input and answer files:
+Try it on a few answers. An empty file stands in for the input and answer files:
 
 ```sh
 touch empty.txt
@@ -311,9 +321,9 @@ echo 'null' > answer.json && node checker.js empty.txt answer.json empty.txt
 # Not every figure is on stilts.
 ```
 
-`echo $?` after each one shows the exit code.
+Run `echo $?` after any of them to see the exit code.
 
-To give part of the score, print `points <n>` and exit with 7. The environment variable `TEST_COST` holds what the run is worth, 100 for a widget problem. For example, 20 points for every figure whose hat is at the most common height, placed just before the last line:
+Want to give partial credit? Print `points <n>` and exit with 7. The environment variable `TEST_COST` holds what the run is worth, which is 100 for a widget problem. For example, to give 20 points for every hat at the most common height, add this just before the last line:
 
 ```js
 const level = Math.max(...tops.map((top) => tops.filter((other) => other === top).length));
@@ -325,15 +335,15 @@ if (level < tops.length) {
 
 ## 8. Test it like a participant
 
-Go back to the dev page and work through the same things Eolymp will do with the widget:
+Back in the preview, put the widget through what Eolymp and participants will do with it:
 
-1. Place the figures as `[5,1,4,0,2]` and check the answer panel shows exactly that.
-2. Press **Reload widget**: the figures must come back where they were. This is how a draft and a past submission are restored.
-3. Paste `"garbage"` into **Restore an answer** and send it: the widget must not break.
-4. Press **Start over**: everything goes back to the tray.
-5. Switch **Mode** to view: the answer shows and nothing can be dragged.
-6. Switch **Theme** to dark: everything stays readable.
-7. Switch **Width** to phone: the yard moves under the tray and everything can still be tapped.
+1. Place the figures as `[5,1,4,0,2]` and check that the answer panel shows exactly that.
+2. Press **Reload widget**. The figures should come back where they were: that's how drafts and past submissions are restored.
+3. Paste `"garbage"` into **Restore an answer** and send it. The widget shouldn't break.
+4. Press **Start over**. All figures go back to where they started.
+5. Switch **Mode** to view. The answer is shown and nothing can be dragged.
+6. Switch **Theme** to dark. Everything should stay easy to read.
+7. Switch **Width** to phone. The stilts move under the figures and everything can still be tapped.
 
 ## 9. Pack and upload
 
@@ -341,21 +351,21 @@ Go back to the dev page and work through the same things Eolymp will do with the
 npx @eolymp/widget pack widget
 ```
 
-`pack` checks the folder against the platform's rules, such as no files loaded from other sites and only allowed file types, and writes `widget.zip`. Fix anything it reports before uploading.
+`pack` checks the folder against Eolymp's rules (nothing loaded from other sites, only allowed file types) and writes `widget.zip`. If it reports a problem, fix it before uploading.
 
-In the [console](https://console.eolymp.com):
+Now, in the [console](https://console.eolymp.com):
 
 1. Open **Problems**, click **New problem** and choose **Widget**.
 2. Write the statement: the task from the top of this page.
 3. On the problem's **Widget** tab, **Upload** `widget.zip`.
 4. On the same tab, set the **Checker**: a JavaScript program, Eolymp mode, with the contents of `checker.js`.
-5. Try the widget in the preview and **Submit** `[5,1,4,0,2]`. It should be accepted. Submit a wrong placement too, and check that it is rejected with the checker's message.
+5. Try the widget in the preview and **Submit** the solution. It should be accepted. Submit a wrong placement too, and check that it's rejected with the checker's message.
 6. **Publish** the problem.
 
-The console side is described in full in the [Eolymp help center](https://support.eolymp.com/console/problems/widget).
+That's it: your first widget problem is live. The [Eolymp help center](https://support.eolymp.com/console/problems/widget) covers the console side in more detail.
 
 ## Where to go next
 
-- [examples/](../examples) has a runnable widget for every helper. [examples/stilts](../examples/stilts) is this task with a numbered scale.
-- [AGENTS.md](../AGENTS.md) is the full reference: every helper, its options and answer shape, and the rules for custom widgets. `init` copies it into every widget, so a coding assistant working in the folder reads it too.
-- When no helper fits, keep the answer in `eolymp.state` and draw it yourself. [examples/cut](../examples/cut) drags line ends around a field this way.
+- [examples/](../examples) has a runnable widget for every helper. [examples/stilts](../examples/stilts) is this same task, with a numbered scale.
+- [AGENTS.md](../AGENTS.md) is the full reference: every helper with its options and answer format, and the rules for custom widgets. `init` copies it into each new widget, so an AI assistant working in the folder reads it too.
+- No helper fits your idea? Keep the answer in `eolymp.state` and draw everything yourself. [examples/cut](../examples/cut) does this to let participants drag the ends of lines around a field.
