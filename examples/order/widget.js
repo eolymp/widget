@@ -1,3 +1,3 @@
-const racers = eolymp.sortable("#racers");
+const phases = eolymp.sortable("#phases");
 
-eolymp.widget({ answer: racers });
+eolymp.widget({ answer: phases });

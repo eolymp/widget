@@ -1,4 +1,4 @@
-import { attribute, makeInteractive, onDrag, resolve, type Root, under } from "./dom";
+import { attribute, makeInteractive, onDrag, resolve, type Root } from "./dom";
 import { readonly } from "./client";
 import { createValue, type Value } from "./value";
 
@@ -32,7 +32,9 @@ export function sortable(root: Root, options: SortableOptions = {}): Value<strin
     let previous: Node = anchor;
     for (const id of order) {
       const item = items.get(id)!;
-      previous.parentNode?.insertBefore(item, previous.nextSibling);
+      if (previous.nextSibling !== item) {
+        previous.parentNode?.insertBefore(item, previous.nextSibling);
+      }
       previous = item;
     }
   };
@@ -42,25 +44,86 @@ export function sortable(root: Root, options: SortableOptions = {}): Value<strin
   const read = () =>
     [...element.querySelectorAll(selector)].map((item) => item.getAttribute(name) ?? "").filter((id) => items.has(id));
 
-  const horizontal = (a: HTMLElement, b: HTMLElement) => {
-    const ra = a.getBoundingClientRect();
-    const rb = b.getBoundingClientRect();
-    return Math.abs(ra.top - rb.top) < Math.min(ra.height, rb.height) / 2;
+  const calm = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const glide = (element: HTMLElement, dx: number, dy: number) => {
+    if (calm || typeof element.animate !== "function" || (!dx && !dy)) {
+      return;
+    }
+    element.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], {
+      duration: 180,
+      easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+    });
   };
 
+  const list = () => [...items.values()];
+  let dragged: HTMLElement | null = null;
+  let offset = { x: 0, y: 0 };
+  let grab = { x: 0, y: 0 };
+  let layout = new Map<HTMLElement, DOMRect>();
+
+  const measure = () => {
+    layout = new Map(
+      list().map((item) => {
+        const rect = item.getBoundingClientRect();
+        return [item, item === dragged ? new DOMRect(rect.x - offset.x, rect.y - offset.y, rect.width, rect.height) : rect];
+      }),
+    );
+  };
+
+  const flip = (change: () => void) => {
+    const others = list().filter((item) => item !== dragged);
+    const before = new Map(others.map((item) => [item, item.getBoundingClientRect()]));
+    for (const item of others) {
+      item.getAnimations?.().forEach((animation) => animation.cancel());
+    }
+    change();
+    measure();
+    for (const item of others) {
+      const from = before.get(item)!;
+      const to = layout.get(item)!;
+      glide(item, from.left - to.left, from.top - to.top);
+    }
+  };
+
+  const follow = (x: number, y: number) => {
+    const base = layout.get(dragged!)!;
+    offset = { x: x - grab.x - base.left, y: y - grab.y - base.top };
+    dragged!.style.transform = `translate(${offset.x}px, ${offset.y}px)`;
+  };
+
+  const sameRow = (a: DOMRect, b: DOMRect) => Math.abs(a.top - b.top) < Math.min(a.height, b.height) / 2;
+
   onDrag(element, selector, {
-    move: (drag) => {
-      const target = under(drag.x, drag.y, selector, element);
-      if (!target || target === drag.element) {
-        return;
-      }
-      const rect = target.getBoundingClientRect();
-      const after = horizontal(target, drag.element)
-        ? drag.x > rect.left + rect.width / 2
-        : drag.y > rect.top + rect.height / 2;
-      target.parentNode?.insertBefore(drag.element, after ? target.nextSibling : target);
+    start: (drag) => {
+      dragged = drag.element;
+      const rect = dragged.getBoundingClientRect();
+      grab = { x: drag.x - drag.dx - rect.left, y: drag.y - drag.dy - rect.top };
+      offset = { x: 0, y: 0 };
+      measure();
     },
-    end: () => value.set(read()),
+    move: (drag) => {
+      const own = layout.get(drag.element)!;
+      for (const [target, rect] of layout) {
+        if (target === drag.element || drag.x < rect.left || drag.x > rect.right || drag.y < rect.top || drag.y > rect.bottom) {
+          continue;
+        }
+        const after = sameRow(rect, own) ? drag.x > rect.left + rect.width / 2 : drag.y > rect.top + rect.height / 2;
+        const spot = after ? target.nextSibling : target;
+        if (spot !== drag.element && spot !== drag.element.nextSibling) {
+          flip(() => target.parentNode?.insertBefore(drag.element, spot));
+        }
+        break;
+      }
+      follow(drag.x, drag.y);
+    },
+    end: (drag) => {
+      const { x, y } = offset;
+      drag.element.style.transform = "";
+      dragged = null;
+      offset = { x: 0, y: 0 };
+      glide(drag.element, x, y);
+      value.set(read());
+    },
   });
 
   element.addEventListener("keydown", (event) => {
@@ -81,7 +144,7 @@ export function sortable(root: Root, options: SortableOptions = {}): Value<strin
     }
     const next = [...order];
     [next[at], next[to]] = [next[to], next[at]];
-    value.set(next);
+    flip(() => value.set(next));
     item.focus();
   });
 
