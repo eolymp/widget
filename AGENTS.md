@@ -66,7 +66,8 @@ Call it **once**, after the DOM the widget needs exists. It can be called before
 ```js
 eolymp.widget({
   answer,            // a Value (see below); the usual way
-  load(context) {},  // optional; may be async. context = { mode, locale, readonly }
+  load(context) {},  // optional; may be async. context = { mode, locale, theme, readonly }
+  setTheme(theme) {}, // optional; the page switched between "light" and "dark"
   getHeight() {},    // optional; the document height is measured automatically
 });
 ```
@@ -91,6 +92,10 @@ Everything that holds part of an answer is a `Value`: `{ get(), set(v), update(f
 ### Mode
 
 `load` receives `mode`: `"solve"` while the participant works, and `"view"` while a past submission is shown. In view mode the SDK sets `<html data-mode="view">`, and every helper ignores input. In custom code, check `eolymp.readonly()` before changing state. `eolymp.locale()` returns the page language.
+
+### Theme
+
+The page is light or dark, and the widget follows it. The SDK sets `<html data-theme="light">` or `<html data-theme="dark">` before `load` and again whenever the reader switches, and `eolymp.theme()` returns the current one. See [Look and layout](#look-and-layout) for styling.
 
 `eolymp.submit()` asks the page to submit. You almost never want it, because the page has its own submit button.
 
@@ -207,6 +212,14 @@ Variables: `--ew-font --ew-fg --ew-muted --ew-surface --ew-subtle --ew-border --
 
 - It must work from **360px** wide (a phone) up to about 900px. Use `max-width: 100%` and scale SVGs with `viewBox`; never use a fixed page width.
 - Keep the background transparent so the widget sits naturally on the page.
+- Support both themes. The `--ew-*` variables already switch, so the helpers need nothing. Give every colour of your own a dark version under `:root[data-theme="dark"]`, best as variables:
+
+  ```css
+  :root { --island: #f1d9a7; --bridge: #8aa4bf; }
+  :root[data-theme="dark"] { --island: #8a6d3b; --bridge: #6b7f96; }
+  ```
+
+  Code that draws on a `<canvas>` reads `eolymp.theme()` and redraws in `setTheme`.
 - Don't wrap the widget in a container: no card, box, border, shadow or tinted panel around the content. The page already shows the widget inside a frame, so a box of your own draws a second frame inside it. Draw only the objects themselves.
 - The frame grows to the document's height automatically. Avoid `height: 100vh`, because it creates a feedback loop.
 
@@ -216,4 +229,5 @@ Variables: `--ew-font --ew-fg --ew-muted --ew-surface --ew-subtle --ew-border --
 2. In `dev`: build an answer, check the JSON is what the checker expects, then press **Reload widget** and confirm the answer comes back exactly.
 3. Switch to **view** mode: the answer shows and nothing can be changed.
 4. Check the **Phone** width: nothing overflows and everything can be tapped.
-5. The widget contains no question text, no buttons of its own, and nothing that reveals the correct answer.
+5. Switch **Theme** to dark: everything is readable and nothing is left on a light patch.
+6. The widget contains no question text, no buttons of its own, and nothing that reveals the correct answer.

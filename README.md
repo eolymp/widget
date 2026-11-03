@@ -56,7 +56,8 @@ The widget runs in `<iframe sandbox="allow-scripts allow-forms">`, so it has an 
 
 | `request` | `response` | Meaning |
 |---|---|---|
-| `{ type: "load", mode: "solve" \| "view", locale }` | `{ height? }` | Start. Sent once per page load. The host shows a loader until it is answered. |
+| `{ type: "load", mode: "solve" \| "view", locale, theme? }` | `{ height? }` | Start. Sent once per page load. The host shows a loader until it is answered. `theme` is `"light"` or `"dark"`, and a widget treats a missing one as light. |
+| `{ type: "set_theme", theme: "light" \| "dark" }` | `{}` | The page switched theme. A widget that doesn't know this request replies with an error, which the host ignores. |
 | `{ type: "reload_answer", answer: string }` | `{}` | Show this answer: a draft or a past submission. The JSON was produced by `get_answer`, possibly by an older version of the widget. |
 | `{ type: "get_answer" }` | `{ answer: string }` | Return the current answer as a JSON string of at most 64 KB. |
 | `{ type: "get_height" }` | `{ height }` | Return the desired height in CSS pixels. |
