@@ -125,7 +125,7 @@ Builds a sequence of picks: a route, a word traced through letters, a walk throu
 - Clicking the last element removes it. Clicking an earlier element cuts the path back to it, unless `repeat: true`, which allows revisiting.
 - Answer: `["A", "B", "D"]`. Elements get `data-order="N"`.
 
-The pick helpers work on HTML **and SVG** elements. Pass the `<svg>` as root and put `data-id` on the shapes. Picked elements get `[data-picked]`, which you can style.
+The pick helpers work on HTML **and SVG** elements. Pass the `<svg>` as root and put `data-id` on the shapes. Picked elements get `[data-picked]`, which you can style. SVG shapes get no focus outline, because a rectangle around a line or a circle looks wrong; style `:focus-visible` on the shape yourself if you want one.
 
 ### `slots(root, { items?, slots?, capacity?, initial? })`
 
@@ -207,6 +207,7 @@ Variables: `--ew-font --ew-fg --ew-muted --ew-surface --ew-subtle --ew-border --
 
 - It must work from **360px** wide (a phone) up to about 900px. Use `max-width: 100%` and scale SVGs with `viewBox`; never use a fixed page width.
 - Keep the background transparent so the widget sits naturally on the page.
+- Don't wrap the widget in a container: no card, box, border, shadow or tinted panel around the content. The page already shows the widget inside a frame, so a box of your own draws a second frame inside it. Draw only the objects themselves.
 - The frame grows to the document's height automatically. Avoid `height: 100vh`, because it creates a feedback loop.
 
 ## Checklist before uploading
