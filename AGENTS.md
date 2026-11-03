@@ -178,12 +178,18 @@ The answer is read by the checker, not by people. Make it easy to grade:
 - Use **stable, meaningful ids** (`"A"`, `"apple"`, `"r2c3"`), not DOM indexes or pixel positions.
 - Record only what the checker needs: the final state, not a history of clicks (unless the task is about the moves).
 - Keep it deterministic. The same visible state must always produce the same JSON.
-- If a task has several independent parts, use `combine` and grade each part in its own test (see below).
+- If a task has several independent parts, use `combine`, and let the checker award points for each part (see below).
 - Never put correctness into the answer, such as `"correct": true`. The checker decides.
 
 ## The checker
 
-On every test the checker reads the widget's JSON as `output.txt`, and that test's expected data as `answer.txt`. Parse both as JSON; never compare them as text. A widget problem with several parts uses one test per part, and the checker reads `TEST_INDEX` from the environment to know which part to grade. Full guide: https://support.eolymp.com/coaching/problems/widget
+A widget problem has no tests. Each submission is judged once, worth 100 points: the checker receives the widget's JSON as the participant's output file, and the input and answer files are empty, so the checker itself holds what the task expects.
+
+- Parse the output as JSON; never compare it as text.
+- Where several answers are correct (two routes of the same length), verify the answer instead of comparing it with one expected value.
+- In Testlib or Eolymp mode, exit 0 for full marks and 1 for a wrong answer. For part of the score, print `points <n>` and exit 7; `TEST_COST` in the environment holds what the run is worth.
+
+Full guide: https://support.eolymp.com/console/problems/widget
 
 ## Look and layout
 
