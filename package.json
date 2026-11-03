@@ -1,5 +1,5 @@
 {
-  "name": "@eolymp/widget-sdk",
+  "name": "@eolymp/widget",
   "version": "0.0.0",
   "description": "Build widget (Bebras-style) problems for Eolymp: the host protocol, input helpers, base styles and a dev/pack CLI.",
   "license": "MIT",

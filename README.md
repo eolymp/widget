@@ -1,4 +1,4 @@
-# @eolymp/widget-sdk
+# @eolymp/widget
 
 The official toolkit for building **widget problems** on [Eolymp](https://eolymp.com): Bebras-style tasks where the participant answers by interacting with a picture rather than by writing code.
 
@@ -11,9 +11,9 @@ The official toolkit for building **widget problems** on [Eolymp](https://eolymp
 ## Quick start
 
 ```sh
-npx @eolymp/widget-sdk init my-widget
-npx @eolymp/widget-sdk dev my-widget      # open http://localhost:4300
-npx @eolymp/widget-sdk pack my-widget     # → my-widget.zip
+npx @eolymp/widget init my-widget
+npx @eolymp/widget dev my-widget      # open http://localhost:4300
+npx @eolymp/widget pack my-widget     # → my-widget.zip
 ```
 
 Upload the zip in the console under **Problems → your problem → Widget**.
@@ -25,7 +25,7 @@ eolymp.widget({ answer: board });
 
 ### Why the SDK is copied into the bundle
 
-Widgets run under a content policy that allows scripts only from Eolymp's asset host, so a widget cannot load the SDK from a CDN. `init` copies `widget-sdk.js` and `widget-sdk.css` into `lib/`. The standalone build is also published at `@eolymp/widget-sdk/widget-sdk.js` (for example on jsDelivr or unpkg) to download, not to link.
+Widgets run under a content policy that allows scripts only from Eolymp's asset host, so a widget cannot load the SDK from a CDN. `init` copies `widget-sdk.js` and `widget-sdk.css` into `lib/`. The standalone build is also published at `@eolymp/widget/widget-sdk.js` (for example on jsDelivr or unpkg) to download, not to link.
 
 ## API
 
@@ -48,7 +48,7 @@ A `Value<T>` is `{ get(), set(v), update(fn), subscribe(fn) }`. The details and 
 
 ## Protocol
 
-For hosts, tests, and anyone writing a widget without this SDK. The types are exported from `@eolymp/widget-sdk/protocol`.
+For hosts, tests, and anyone writing a widget without this SDK. The types are exported from `@eolymp/widget/protocol`.
 
 The widget runs in `<iframe sandbox="allow-scripts allow-forms">`, so it has an opaque origin. Messages go through `postMessage` with target `"*"`, and each side accepts only messages whose `event.source` is the other side's window: the host accepts its own frame, and the widget accepts `window.parent`. Every message carries `protocol: "eolymp.widget.v1"`, and anything without it is ignored.
 

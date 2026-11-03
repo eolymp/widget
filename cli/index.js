@@ -119,7 +119,7 @@ function check(root, entry) {
   }
 
   if (total > LIMITS.unpacked) errors.push(`unpacked size is ${mb(total)}; at most ${mb(LIMITS.unpacked)}`);
-  if (!client) warnings.push("no widget client found — include widget-sdk.js (or import @eolymp/widget-sdk) and call eolymp.widget(...)");
+  if (!client) warnings.push("no widget client found — include widget-sdk.js (or import @eolymp/widget) and call eolymp.widget(...)");
 
   return { files, docs, errors, warnings, total };
 }
@@ -168,7 +168,7 @@ function init(opts) {
   cpSync(join(pkg, "AGENTS.md"), join(target, "AGENTS.md"));
 
   const rel = relative(process.cwd(), target) || ".";
-  console.log(`Created ${rel}. Next:\n\n  npx @eolymp/widget-sdk dev ${rel}\n  npx @eolymp/widget-sdk pack ${rel}\n`);
+  console.log(`Created ${rel}. Next:\n\n  npx @eolymp/widget dev ${rel}\n  npx @eolymp/widget pack ${rel}\n`);
 }
 
 function dev(opts) {

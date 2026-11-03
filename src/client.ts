@@ -174,7 +174,7 @@ function create(): WidgetClient {
       watch();
 
       if (standalone) {
-        console.info("[eolymp] not inside a host; loaded in solve mode. Run `npx @eolymp/widget-sdk dev` to test it.");
+        console.info("[eolymp] not inside a host; loaded in solve mode. Run `npx @eolymp/widget dev` to test it.");
         void load("solve", language);
         return;
       }
