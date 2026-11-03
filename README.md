@@ -20,15 +20,6 @@ Upload the zip in the console under **Problems → your problem → Widget**.
 
 New to widgets? The tutorial builds a complete problem step by step: the widget, the checker, and the upload. It is available in [English](./docs/tutorial.md) and [Ukrainian](./docs/tutorial.uk.md).
 
-```js
-const board = eolymp.grid("#board", { rows: 4, cols: 4 });
-eolymp.widget({ answer: board });
-```
-
-### Why the SDK is copied into the bundle
-
-Widgets run under a content policy that allows scripts only from Eolymp's asset host, so a widget cannot load the SDK from a CDN. `init` copies `widget-sdk.js` and `widget-sdk.css` into `lib/`. The standalone build is also published at `@eolymp/widget/widget-sdk.js` (for example on jsDelivr or unpkg) to download, not to link.
-
 ## API
 
 | Export | Returns | Answer shape |
