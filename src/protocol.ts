@@ -1,5 +1,7 @@
 export const PROTOCOL = "eolymp.widget.v1";
 
+export const VERSION = 3;
+
 export type WidgetMode = "solve" | "view";
 
 export type WidgetTheme = "light" | "dark";
@@ -12,7 +14,7 @@ export type WidgetRequest =
   | { type: "get_height" };
 
 export interface WidgetResponse {
-  load: { height?: number };
+  load: { height?: number; version?: number };
   set_theme: Record<string, never>;
   reload_answer: Record<string, never>;
   get_answer: { answer: string };

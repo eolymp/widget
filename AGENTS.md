@@ -77,14 +77,14 @@ Lower-level alternative, when the answer doesn't live in a Value:
 ```js
 eolymp.widget({
   getAnswer: () => ({ cells }),               // object or array; serialised for you
-  reloadAnswer: (answer) => { /* show it */ }, // gets the parsed JSON
+  reloadAnswer: (answer) => { /* show it */ }, // gets the parsed JSON, or null to start over
 });
 // then call eolymp.answerChanged() after every user change
 ```
 
 ### Values
 
-Everything that holds part of an answer is a `Value`: `{ get(), set(v), update(fn), subscribe(fn) }`. Every helper below returns one. Pass a Value as `answer` and the SDK does the rest: it reads the answer from it, restores into it without echoing a change back, and reports every change as a draft.
+Everything that holds part of an answer is a `Value`: `{ get(), set(v), update(fn), subscribe(fn) }`. Every helper below returns one. Pass a Value as `answer` and the SDK does the rest: it reads the answer from it, restores into it without echoing a change back, and reports every change as a draft. When the participant starts over, the Value goes back to what it held when `eolymp.widget()` was called.
 
 - `eolymp.state(initial)` is a plain Value for custom widgets.
 - `eolymp.combine({ a: valueA, b: valueB })` merges several Values into one answer `{ a, b }`. Use it for tasks with several parts.
@@ -226,7 +226,7 @@ Variables: `--ew-font --ew-fg --ew-muted --ew-surface --ew-subtle --ew-border --
 ## Checklist before uploading
 
 1. `pack` reports no errors and no warnings.
-2. In `dev`: build an answer, check the JSON is what the checker expects, then press **Reload widget** and confirm the answer comes back exactly.
+2. In `dev`: build an answer, check the JSON is what the checker expects, then press **Reload widget** and confirm the answer comes back exactly. Press **Start over** and confirm the widget is back the way it opened.
 3. Switch to **view** mode: the answer shows and nothing can be changed.
 4. Check the **Phone** width: nothing overflows and everything can be tapped.
 5. Switch **Theme** to dark: everything is readable and nothing is left on a light patch.
