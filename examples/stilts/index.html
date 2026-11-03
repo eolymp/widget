@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stilts</title>
+  <link rel="stylesheet" href="../lib/widget-sdk.css">
+</head>
+<body>
+  <style>
+    :root {
+      --u: min(18px, calc((100vw - 80px) / 47));
+      --top: 19;
+      --line: #e4e8ee;
+      --mark: #9aa4b2;
+      --wood: #b98a4b;
+      --plank: #8a5a2b;
+      --body: #c9a27a;
+      --hat: #3f4a5a;
+    }
+
+    @media (max-width: 640px) {
+      :root {
+        --u: calc((100vw - 64px) / 25);
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --line: #2f343c;
+      --mark: #6f7987;
+      --wood: #9a7442;
+      --plank: #c0894f;
+      --body: #8f7055;
+      --hat: #c7ced8;
+    }
+
+    .scene {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 24px calc(2 * var(--u));
+    }
+
+    .tray {
+      display: flex;
+      align-items: flex-end;
+      gap: calc(0.8 * var(--u));
+      min-height: calc(12 * var(--u));
+    }
+
+    .yard {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      gap: calc(0.5 * var(--u));
+      height: calc(var(--top) * var(--u) + 1px);
+      padding-left: 24px;
+      background: repeating-linear-gradient(to top, var(--line) 0 1px, transparent 1px var(--u)) 24px 0 / calc(100% - 24px) 100% no-repeat;
+    }
+
+    .yard b {
+      position: absolute;
+      left: 0;
+      width: 18px;
+      bottom: calc(var(--n) * var(--u) - 0.5em);
+      font: 500 11px/1 var(--ew-font);
+      color: var(--mark);
+      text-align: right;
+    }
+
+    .yard [data-slot] {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 0;
+      width: calc(3.6 * var(--u));
+      min-width: 0;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+    }
+
+    .pole {
+      width: calc(0.4 * var(--u));
+      height: calc(var(--s) * var(--u));
+      background: var(--wood);
+      position: relative;
+    }
+
+    .pole::before {
+      content: "";
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      width: calc(3.2 * var(--u));
+      height: 5px;
+      translate: -50% 0;
+      border-radius: 2px;
+      background: var(--plank);
+      transition: background-color 0.12s;
+    }
+
+    .yard [data-slot][data-over] .pole::before {
+      background: var(--ew-accent);
+    }
+
+    .yard [data-slot] [data-item] {
+      order: -1;
+      margin-bottom: 1px;
+    }
+
+    [data-item] {
+      width: calc(2.4 * var(--u));
+      height: calc(var(--h) * var(--u));
+      padding: 0;
+      border: 0;
+      border-radius: calc(1.2 * var(--u)) calc(1.2 * var(--u)) 4px 4px;
+      background: linear-gradient(var(--hat) 0 calc(1.5 * var(--u)), var(--body) 0);
+      box-shadow: none;
+    }
+
+    [data-ew="item"][data-selected] {
+      box-shadow: none;
+      filter: drop-shadow(0 0 3px var(--ew-accent)) drop-shadow(0 0 1px var(--ew-accent));
+    }
+
+    [data-item][data-dragging] {
+      box-shadow: none;
+      filter: drop-shadow(0 6px 8px rgb(0 0 0 / 0.25));
+    }
+
+    [data-item]:focus-visible {
+      outline-offset: 4px;
+    }
+
+  </style>
+  <div class="scene" id="scene">
+    <div class="tray">
+      <div data-item="0" aria-label="Figure 1" style="--h: 12"></div>
+      <div data-item="1" aria-label="Figure 2" style="--h: 9"></div>
+      <div data-item="2" aria-label="Figure 3" style="--h: 6"></div>
+      <div data-item="3" aria-label="Figure 4" style="--h: 10"></div>
+      <div data-item="4" aria-label="Figure 5" style="--h: 11"></div>
+    </div>
+    <div class="yard" id="yard">
+      <div data-slot="0" aria-label="Stilts 1" style="--s: 3"><i class="pole"></i></div>
+      <div data-slot="1" aria-label="Stilts 2" style="--s: 4"><i class="pole"></i></div>
+      <div data-slot="2" aria-label="Stilts 3" style="--s: 2"><i class="pole"></i></div>
+      <div data-slot="3" aria-label="Stilts 4" style="--s: 6"><i class="pole"></i></div>
+      <div data-slot="4" aria-label="Stilts 5" style="--s: 7"><i class="pole"></i></div>
+      <div data-slot="5" aria-label="Stilts 6" style="--s: 1"><i class="pole"></i></div>
+    </div>
+  </div>
+  <script src="../lib/widget-sdk.js"></script>
+  <script src="./widget.js"></script>
+</body>
+</html>
