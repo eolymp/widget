@@ -18,6 +18,8 @@ npx @eolymp/widget pack my-widget     # → my-widget.zip
 
 Upload the zip in the console under **Problems → your problem → Widget**.
 
+New to widgets? The [tutorial](./docs/tutorial.md) builds a complete problem step by step: the widget, the checker, and the upload.
+
 ```js
 const board = eolymp.grid("#board", { rows: 4, cols: 4 });
 eolymp.widget({ answer: board });
