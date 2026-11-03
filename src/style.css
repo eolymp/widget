@@ -191,10 +191,6 @@ svg [data-ew="pick"][data-picked] {
   box-shadow: 0 6px 16px rgb(0 0 0 / 0.18);
 }
 
-[data-ew="sort"][data-dragging] {
-  opacity: 0.6;
-}
-
 [data-ew="slot"] {
   display: flex;
   flex-wrap: wrap;

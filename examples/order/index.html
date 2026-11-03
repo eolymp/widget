@@ -7,13 +7,32 @@
   <link rel="stylesheet" href="../lib/widget-sdk.css">
 </head>
 <body>
+  <style>
+    #phases { gap: 12px; counter-reset: night; }
+    #phases [data-id] {
+      width: 76px;
+      height: 96px;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 40px;
+      line-height: 1;
+      border-radius: 14px;
+      background: linear-gradient(#f7f9fd, #e6ecf8);
+      counter-increment: night;
+    }
+    #phases [data-id]::after {
+      content: counter(night);
+      font: 600 12px/1 var(--ew-font);
+      color: var(--ew-muted);
+    }
+  </style>
   <div class="ew-center">
-    <div class="ew-row" id="racers">
-      <div data-id="A">A</div>
-      <div data-id="B">B</div>
-      <div data-id="C">C</div>
-      <div data-id="D">D</div>
-      <div data-id="E">E</div>
+    <div class="ew-row" id="phases">
+      <div data-id="quarter">🌓</div>
+      <div data-id="new">🌑</div>
+      <div data-id="full">🌕</div>
+      <div data-id="crescent">🌒</div>
+      <div data-id="gibbous">🌔</div>
     </div>
   </div>
   <script src="../lib/widget-sdk.js"></script>
