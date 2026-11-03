@@ -56,9 +56,9 @@ The widget runs in `<iframe sandbox="allow-scripts allow-forms">`, so it has an 
 
 | `request` | `response` | Meaning |
 |---|---|---|
-| `{ type: "load", mode: "solve" \| "view", locale, theme? }` | `{ height? }` | Start. Sent once per page load. The host shows a loader until it is answered. `theme` is `"light"` or `"dark"`, and a widget treats a missing one as light. |
-| `{ type: "set_theme", theme: "light" \| "dark" }` | `{}` | The page switched theme. A widget that doesn't know this request replies with an error, which the host ignores. |
-| `{ type: "reload_answer", answer: string }` | `{}` | Show this answer: a draft or a past submission. The JSON was produced by `get_answer`, possibly by an older version of the widget. |
+| `{ type: "load", mode: "solve" \| "view", locale, theme? }` | `{ height?, version? }` | Start. Sent once per page load. The host shows a loader until it is answered. `theme` is `"light"` or `"dark"`, and a widget treats a missing one as light. `version` is the protocol revision the widget speaks (below), 1 when missing. |
+| `{ type: "set_theme", theme: "light" \| "dark" }` | `{}` | The page switched theme. Sent only to a widget of version 3 or later. |
+| `{ type: "reload_answer", answer: string }` | `{}` | Show this answer: a draft or a past submission. The JSON was produced by `get_answer`, possibly by an older version of the widget. From version 2, an empty string means the participant starts over: put the widget back the way it opened. |
 | `{ type: "get_answer" }` | `{ answer: string }` | Return the current answer as a JSON string of at most 64 KB. |
 | `{ type: "get_height" }` | `{ height }` | Return the desired height in CSS pixels. |
 
@@ -69,6 +69,8 @@ The widget runs in `<iframe sandbox="allow-scripts allow-forms">`, so it has an 
 | `{ type: "answer_changed", answer }` | The participant changed something; the host stores it as a draft. |
 | `{ type: "height_changed", height }` | The content height changed. |
 | `{ type: "submit" }` | The widget asks the host to submit. Rarely appropriate. |
+
+Versions: 1 is the base set above; 2 adds the empty `reload_answer` reset, which a host otherwise does by loading the frame again; 3 adds `set_theme`. This SDK speaks 3. The `protocol` marker stays `eolymp.widget.v1` across versions.
 
 Order: the frame loads → `load` → (`reload_answer` if a draft or a submission exists) → events and `get_answer` as needed. A request that goes unanswered for 10 seconds fails, and the host shows the widget as broken. Requests can arrive before the widget's script has run, so a client must queue them until the widget is ready, as this SDK does.
 

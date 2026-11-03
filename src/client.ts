@@ -1,6 +1,7 @@
 import {
   isCall,
   PROTOCOL,
+  VERSION,
   type WidgetCall,
   type WidgetEvent,
   type WidgetMode,
@@ -47,6 +48,7 @@ function create(): WidgetClient {
   let scheme: WidgetTheme = "light";
   let restoring = false;
   let backlog: WidgetCall[] = [];
+  let initial: unknown;
 
   const standalone = window.parent === window;
 
@@ -75,13 +77,15 @@ function create(): WidgetClient {
       return;
     }
 
-    if (definition?.answer && answer !== null && answer !== undefined) {
-      restoring = true;
-      try {
-        definition.answer.set(answer);
-      } finally {
-        restoring = false;
-      }
+    if (!definition?.answer || answer === undefined) {
+      return;
+    }
+
+    restoring = true;
+    try {
+      definition.answer.set(answer ?? initial);
+    } finally {
+      restoring = false;
     }
   };
 
@@ -115,13 +119,13 @@ function create(): WidgetClient {
       case "load":
         await load(request.mode, request.locale, request.theme);
         height = measure();
-        return { height };
+        return { height, version: VERSION };
       case "set_theme":
         paint(request.theme);
         definition.setTheme?.(scheme);
         return {};
       case "reload_answer":
-        restore(parse(request.answer));
+        restore(request.answer === "" ? null : parse(request.answer));
         return {};
       case "get_answer":
         return { answer: serialize() };
@@ -185,6 +189,7 @@ function create(): WidgetClient {
       }
 
       definition = value;
+      initial = value.answer?.get();
       value.answer?.subscribe(answerChanged);
       watch();
 

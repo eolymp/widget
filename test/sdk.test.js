@@ -149,6 +149,7 @@ test("client answers the host through a value", async () => {
   sdk.widget({ answer: board, load: (context) => (loaded = context) });
 
   const reply = await pending;
+  assert.equal(reply.response.version, sdk.VERSION);
   assert.deepEqual(loaded, { mode: "solve", locale: "uk", theme: "light", readonly: false });
   assert.equal(typeof reply.response.height, "number");
 
@@ -161,6 +162,10 @@ test("client answers the host through a value", async () => {
   assert.equal(events("answer_changed").length, before);
 
   assert.equal((await call({ type: "get_answer" })).response.answer, "[[1,1]]");
+
+  await call({ type: "reload_answer", answer: "" });
+  assert.deepEqual(board.get(), [[0, 0]]);
+  await call({ type: "reload_answer", answer: "[[1,1]]" });
 
   assert.equal(document.documentElement.dataset.theme, "light");
   await call({ type: "set_theme", theme: "dark" });
