@@ -140,6 +140,14 @@ test("sortable keeps every item when restoring a partial order", () => {
   assert.deepEqual([...root.querySelectorAll("i")].map((i) => i.dataset.id), ["c", "a", "b"]);
 });
 
+test("state normalises what it is given", () => {
+  const value = sdk.state([0], (v) => (Array.isArray(v) ? v : [0]));
+  value.set("garbage");
+  assert.deepEqual(value.get(), [0]);
+  value.update((v) => [...v, 1]);
+  assert.deepEqual(value.get(), [0, 1]);
+});
+
 test("client answers the host through a value", async () => {
   const root = mount(`<div id="board"></div>`);
   const pending = call({ type: "load", mode: "solve", locale: "uk" });

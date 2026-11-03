@@ -30,8 +30,8 @@ export function createValue<T>(initial: T, render?: (value: T) => void, normaliz
   };
 }
 
-export function state<T>(initial: T): Value<T> {
-  return createValue(initial);
+export function state<T>(initial: T, normalize?: (value: unknown) => T): Value<T> {
+  return createValue(initial, undefined, normalize);
 }
 
 type Values<T> = { [K in keyof T]: Value<T[K]> };
