@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bridges</title>
+  <link rel="stylesheet" href="../lib/widget-sdk.css">
+</head>
+<body>
+  <style>
+    :root {
+      --rope: #8aa4bf;
+      --plank: #9a6a3a;
+      --sand: #f1d9a7;
+      --shore: #b8925a;
+      --ink: #4a3a22;
+    }
+
+    :root[data-theme="dark"] {
+      --rope: #5d6f84;
+      --plank: #c08a52;
+      --sand: #8a6d3b;
+      --shore: #c9a46a;
+      --ink: #fbf3e2;
+    }
+
+    #map {
+      width: 100%;
+      max-width: 640px;
+      height: auto;
+      display: block;
+    }
+
+    .bridge .hit {
+      stroke: transparent;
+      stroke-width: 28;
+      stroke-linecap: round;
+    }
+
+    .bridge .deck {
+      stroke: var(--rope);
+      stroke-width: 3;
+      stroke-dasharray: 8 7;
+      stroke-linecap: round;
+    }
+
+    .bridge .cost {
+      fill: var(--ew-surface);
+      stroke: var(--rope);
+      stroke-width: 2;
+    }
+
+    .bridge .cost-label {
+      fill: var(--ew-fg);
+      font: 600 15px var(--ew-font);
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+
+    svg .bridge[data-ew="pick"][data-picked] {
+      stroke: none;
+    }
+
+    .bridge[data-picked] .deck {
+      stroke: var(--plank);
+      stroke-width: 12;
+      stroke-dasharray: 3 3;
+      stroke-linecap: butt;
+    }
+
+    .bridge[data-picked] .cost {
+      fill: var(--ew-accent);
+      stroke: var(--ew-accent);
+    }
+
+    .bridge[data-picked] .cost-label {
+      fill: var(--ew-accent-fg);
+    }
+
+    .bridge:focus-visible .cost {
+      stroke: var(--ew-accent);
+      stroke-width: 4;
+    }
+
+    .island circle {
+      fill: var(--sand);
+      stroke: var(--shore);
+      stroke-width: 3;
+    }
+
+    .island text {
+      fill: var(--ink);
+      font: 700 22px var(--ew-font);
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+
+    .island {
+      pointer-events: none;
+    }
+  </style>
+  <div class="ew-center">
+    <svg id="map" viewBox="0 0 640 400" role="group" aria-label="Islands and possible bridges"></svg>
+  </div>
+  <script src="../lib/widget-sdk.js"></script>
+  <script src="./widget.js"></script>
+</body>
+</html>

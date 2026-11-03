@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cut</title>
+  <link rel="stylesheet" href="../lib/widget-sdk.css">
+</head>
+<body>
+  <style>
+    :root { --red: #d9344a; --brown: #8a5a3b; }
+    :root[data-theme="dark"] { --red: #f0566b; --brown: #b07d58; }
+    .mushroom[data-color="red"] { fill: var(--red); }
+    .mushroom[data-color="brown"] { fill: var(--brown); }
+
+    .meadow {
+      display: block;
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .cut {
+      stroke: var(--ew-fg);
+      stroke-width: 2.5;
+      stroke-linecap: round;
+    }
+
+    .handle {
+      fill: var(--ew-accent-soft);
+      stroke: var(--ew-accent);
+      stroke-width: 2.5;
+      cursor: grab;
+      outline: none;
+    }
+
+    .handle:hover,
+    .handle[data-dragging] {
+      fill: var(--ew-accent);
+    }
+
+    .handle[data-dragging] {
+      cursor: grabbing;
+    }
+
+    .handle:focus-visible {
+      stroke-width: 5;
+    }
+
+    [data-readonly] .handle {
+      cursor: default;
+      fill: var(--ew-accent-soft);
+    }
+  </style>
+  <svg id="meadow" class="meadow" viewBox="6 11 633 333" role="group" aria-label="Meadow with mushrooms">
+    <g id="mushrooms"></g>
+    <g id="lines"></g>
+    <g id="handles"></g>
+  </svg>
+  <script src="../lib/widget-sdk.js"></script>
+  <script src="./widget.js"></script>
+</body>
+</html>
