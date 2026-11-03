@@ -1,5 +1,7 @@
 # Tutorial: your first widget problem
 
+[Українською](./tutorial.uk.md)
+
 In this tutorial we'll build a complete widget problem together, from an empty folder to a problem participants can solve on Eolymp. It's a small task, but it goes through every step you'll take with your own problems.
 
 You'll need [Node.js](https://nodejs.org) 20 or later and an [Eolymp space](https://console.eolymp.com) where you can create problems.
