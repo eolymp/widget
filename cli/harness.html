@@ -6,6 +6,7 @@
 <title>Widget host</title>
 <style>
   :root { --bg:#f4f6f8; --fg:#1a2027; --muted:#5f6b7a; --border:#d4dae1; --card:#fff; --accent:#2563eb; --bad:#dc2626; --warn:#b45309; }
+  :root[data-theme="dark"] { --bg:#16171a; --fg:#e6e9ee; --muted:#9aa4b2; --border:#3d444f; --card:#1c1d21; --accent:#3b82f6; --bad:#f87171; --warn:#fbbf24; color-scheme:dark; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
   header { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 16px; background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:1; }
@@ -41,6 +42,7 @@
   <b>Widget host</b>
   <label>Mode <select id="mode"><option value="solve">solve</option><option value="view">view</option></select></label>
   <label>Locale <input id="locale" value="en" size="4"></label>
+  <label>Theme <select id="theme"><option value="light">light</option><option value="dark">dark</option></select></label>
   <label>Width <select id="width"><option value="360">Phone · 360</option><option value="640">Tablet · 640</option><option value="840" selected>Desktop · 840</option><option value="">Full</option></select></label>
   <button id="reload">Reload widget</button>
   <button id="get" class="primary">Get answer</button>
@@ -116,7 +118,7 @@
         reject(new Error(`widget did not answer "${request.type}" within 10s`));
       }, 10000);
       pending.set(id, { resolve, reject, timer, type: request.type });
-      log(`→ ${request.type}${request.type === "load" ? ` (${request.mode}, ${request.locale})` : ""}`);
+      log(`→ ${request.type}${request.type === "load" ? ` (${request.mode}, ${request.locale}, ${request.theme})` : request.type === "set_theme" ? ` (${request.theme})` : ""}`);
       frame.contentWindow.postMessage({ protocol: PROTOCOL, id, request }, "*");
     });
   };
@@ -159,7 +161,7 @@
     overlay("Loading…");
     setHeight(0);
     try {
-      const response = await send({ type: "load", mode: $("mode").value, locale: $("locale").value || "en" });
+      const response = await send({ type: "load", mode: $("mode").value, locale: $("locale").value || "en", theme: $("theme").value });
       if (response?.height) setHeight(response.height);
       overlay(null);
       if (draft !== undefined) await send({ type: "reload_answer", answer: draft });
@@ -174,6 +176,12 @@
   $("reload").onclick = reload;
   $("mode").onchange = reload;
   $("locale").onchange = reload;
+  $("theme").value = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  document.documentElement.dataset.theme = $("theme").value;
+  $("theme").onchange = async () => {
+    document.documentElement.dataset.theme = $("theme").value;
+    try { await send({ type: "set_theme", theme: $("theme").value }); } catch (e) { log(e.message, true); }
+  };
   $("width").onchange = () => { $("frame").style.maxWidth = $("width").value ? $("width").value + "px" : ""; };
   $("width").onchange();
   $("get").onclick = async () => {

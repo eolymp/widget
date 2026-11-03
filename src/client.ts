@@ -7,12 +7,14 @@ import {
   type WidgetNotification,
   type WidgetReply,
   type WidgetRequest,
+  type WidgetTheme,
 } from "./protocol";
 import type { Value } from "./value";
 
 export interface WidgetContext {
   mode: WidgetMode;
   locale: string;
+  theme: WidgetTheme;
   readonly: boolean;
 }
 
@@ -21,6 +23,7 @@ export interface WidgetDefinition<T = unknown> {
   load?(context: WidgetContext): void | Promise<void>;
   getAnswer?(): unknown;
   reloadAnswer?(answer: unknown): void;
+  setTheme?(theme: WidgetTheme): void;
   getHeight?(): number;
 }
 
@@ -30,6 +33,7 @@ export interface WidgetClient {
   submit(): void;
   mode(): WidgetMode;
   locale(): string;
+  theme(): WidgetTheme;
   readonly(): boolean;
 }
 
@@ -40,6 +44,7 @@ function create(): WidgetClient {
   let height = 0;
   let current: WidgetMode = "solve";
   let language = document.documentElement.lang || "en";
+  let scheme: WidgetTheme = "light";
   let restoring = false;
   let backlog: WidgetCall[] = [];
 
@@ -88,11 +93,17 @@ function create(): WidgetClient {
     return Math.ceil(Math.max(document.documentElement.scrollHeight, document.body?.scrollHeight ?? 0));
   };
 
-  const load = async (mode: WidgetMode, locale: string) => {
+  const paint = (theme: WidgetTheme | undefined) => {
+    scheme = theme === "dark" ? "dark" : "light";
+    document.documentElement.dataset.theme = scheme;
+  };
+
+  const load = async (mode: WidgetMode, locale: string, theme: WidgetTheme | undefined) => {
     current = mode === "view" ? "view" : "solve";
     language = locale || language;
     document.documentElement.dataset.mode = current;
-    await definition?.load?.({ mode: current, locale: language, readonly: current === "view" });
+    paint(theme);
+    await definition?.load?.({ mode: current, locale: language, theme: scheme, readonly: current === "view" });
   };
 
   const perform = async (request: WidgetRequest): Promise<unknown> => {
@@ -102,9 +113,13 @@ function create(): WidgetClient {
 
     switch (request.type) {
       case "load":
-        await load(request.mode, request.locale);
+        await load(request.mode, request.locale, request.theme);
         height = measure();
         return { height };
+      case "set_theme":
+        paint(request.theme);
+        definition.setTheme?.(scheme);
+        return {};
       case "reload_answer":
         restore(parse(request.answer));
         return {};
@@ -175,7 +190,7 @@ function create(): WidgetClient {
 
       if (standalone) {
         console.info("[eolymp] not inside a host; loaded in solve mode. Run `npx @eolymp/widget dev` to test it.");
-        void load("solve", language);
+        void load("solve", language, scheme);
         return;
       }
 
@@ -191,6 +206,7 @@ function create(): WidgetClient {
     },
     mode: () => current,
     locale: () => language,
+    theme: () => scheme,
     readonly: () => current === "view",
   };
 }
@@ -209,6 +225,7 @@ const fallback: WidgetClient = {
   submit() {},
   mode: () => "solve",
   locale: () => "en",
+  theme: () => "light",
   readonly: () => false,
 };
 
@@ -219,4 +236,5 @@ export const answerChanged = client.answerChanged;
 export const submit = client.submit;
 export const mode = client.mode;
 export const locale = client.locale;
+export const theme = client.theme;
 export const readonly = client.readonly;

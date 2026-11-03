@@ -8,6 +8,8 @@
 </head>
 <body>
   <style>
+    :root { --sky-top: #f7f9fd; --sky-bottom: #e6ecf8; }
+    :root[data-theme="dark"] { --sky-top: #2b3140; --sky-bottom: #1b2030; }
     #phases { gap: 12px; counter-reset: night; }
     #phases [data-id] {
       width: 76px;
@@ -17,7 +19,7 @@
       font-size: 40px;
       line-height: 1;
       border-radius: 14px;
-      background: linear-gradient(#f7f9fd, #e6ecf8);
+      background: linear-gradient(var(--sky-top), var(--sky-bottom));
       counter-increment: night;
     }
     #phases [data-id]::after {

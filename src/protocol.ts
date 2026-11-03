@@ -2,14 +2,18 @@ export const PROTOCOL = "eolymp.widget.v1";
 
 export type WidgetMode = "solve" | "view";
 
+export type WidgetTheme = "light" | "dark";
+
 export type WidgetRequest =
-  | { type: "load"; mode: WidgetMode; locale: string }
+  | { type: "load"; mode: WidgetMode; locale: string; theme?: WidgetTheme }
+  | { type: "set_theme"; theme: WidgetTheme }
   | { type: "reload_answer"; answer: string }
   | { type: "get_answer" }
   | { type: "get_height" };
 
 export interface WidgetResponse {
   load: { height?: number };
+  set_theme: Record<string, never>;
   reload_answer: Record<string, never>;
   get_answer: { answer: string };
   get_height: { height: number };
